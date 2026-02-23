@@ -1,0 +1,16 @@
+{
+  "Home": {
+    "title": "Welcome to SabiMarkets",
+    "description": "Africa's First Native Prediction Market",
+    "connect_wallet": "Connect Wallet",
+    "markets": "Markets",
+    "portfolio": "My Money",
+    "bet_now": "Make Bet",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "Market": {
+    "live_odds": "Live Odds",
+    "volume": "Total Money"
+  }
+}
