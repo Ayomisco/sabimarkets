@@ -109,8 +109,8 @@ export function BetModal({
         
         {/* Header */}
         <div className="p-4 border-b border-[#3D2E1E] flex justify-between items-start bg-[#0B0A08]">
-            <div className="pr-8">
-                <h2 className="font-bold text-[18px] leading-snug mb-2 font-mono">
+            <div className="pr-4">
+                <h2 className="font-bold text-[15px] leading-snug mb-2 font-mono">
                     {market.question}
                 </h2>
                 <div className="flex items-center gap-2">
@@ -125,26 +125,26 @@ export function BetModal({
             </button>
         </div>
 
-        <div className="p-4 sm:p-5 overflow-y-auto h-[calc(100vh-80px)] sm:h-auto sm:max-h-[80vh] flex flex-col">
+        <div className="p-4 overflow-y-auto h-[calc(100vh-80px)] sm:h-auto sm:max-h-[80vh] flex flex-col">
             
             {/* Outcome Selectors */}
-            <div className="flex gap-2 sm:gap-3 mb-6 shrink-0">
-                <button className={`flex-1 py-3 sm:py-4 rounded-xl border flex items-center justify-center gap-1 sm:gap-2 font-bold transition-all ${selectedOutcome === 'YES' ? 'bg-[#00C566] border-[#00C566] text-black shadow-[0_0_15px_rgba(0,197,102,0.3)]' : 'bg-[#110F0D] border-[#3D2E1E] text-[#A69C8A]'}`}>
-                    <span className="text-lg leading-none">↗</span> Yes {selectedOutcome === 'YES' ? priceInCents : oppPriceInCents}¢
+            <div className="flex gap-2 mb-4 shrink-0">
+                <button className={`cursor-pointer flex-1 py-2 sm:py-3 rounded-[8px] border flex items-center justify-center gap-1 sm:gap-2 font-bold transition-all text-sm ${selectedOutcome === 'YES' ? 'bg-[#00C566] border-[#00C566] text-black shadow-[0_0_15px_rgba(0,197,102,0.3)]' : 'bg-[#110F0D] border-[#3D2E1E] text-[#A69C8A]'}`}>
+                    <span className="text-[15px] leading-none">↗</span> Yes {selectedOutcome === 'YES' ? priceInCents : oppPriceInCents}¢
                 </button>
-                <button className={`flex-1 py-3 sm:py-4 rounded-xl border flex items-center justify-center gap-1 sm:gap-2 font-bold transition-all ${selectedOutcome === 'NO' ? 'bg-[#E8333A] border-[#E8333A] text-white shadow-[0_0_15px_rgba(232,51,58,0.3)]' : 'bg-[#110F0D] border-[#3D2E1E] text-[#A69C8A]'}`}>
-                    <span className="text-lg leading-none pt-1">↘</span> No {selectedOutcome === 'NO' ? priceInCents : oppPriceInCents}¢
+                <button className={`cursor-pointer flex-1 py-2 sm:py-3 rounded-[8px] border flex items-center justify-center gap-1 sm:gap-2 font-bold transition-all text-sm ${selectedOutcome === 'NO' ? 'bg-[#E8333A] border-[#E8333A] text-white shadow-[0_0_15px_rgba(232,51,58,0.3)]' : 'bg-[#110F0D] border-[#3D2E1E] text-[#A69C8A]'}`}>
+                    <span className="text-[15px] leading-none pt-0.5">↘</span> No {selectedOutcome === 'NO' ? priceInCents : oppPriceInCents}¢
                 </button>
             </div>
 
             {/* Route Order To */}
-            <div className="mb-6">
-                <p className="font-bold mb-3 text-[15px]">Route Order To</p>
-                <div className="flex gap-3 text-sm font-bold">
-                     <button className="bg-white text-black py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-[0_0_10px_rgba(255,255,255,0.2)]">
-                         <span className="text-lg leading-none">⚡</span> Auto (Best)
+            <div className="mb-4">
+                <p className="font-bold mb-2 text-[13px] text-[#A69C8A]">Route Order To</p>
+                <div className="flex gap-2 text-xs font-bold">
+                     <button className="cursor-pointer bg-white text-black py-2 px-3 rounded-[8px] flex items-center gap-2 shadow-[0_0_10px_rgba(255,255,255,0.2)]">
+                         <span className="text-sm leading-none">⚡</span> Auto
                      </button>
-                     <button className="bg-[#110F0D] text-[#A69C8A] border border-[#3D2E1E] py-2.5 px-4 rounded-xl flex flex-1 items-center justify-between">
+                     <button className="cursor-pointer bg-[#110F0D] text-[#A69C8A] border border-[#3D2E1E] py-2 px-3 rounded-[8px] flex flex-1 items-center justify-between">
                          <div className="flex items-center gap-1.5">
                              <span className="w-4 h-4 bg-[#1A1511] text-[#A69C8A] flex items-center justify-center text-[8px] rounded-full border border-[#3D2E1E]">P</span>
                              Polymarket
@@ -158,25 +158,25 @@ export function BetModal({
             </div>
 
              {/* Order Type Toggle */}
-             <div className="flex bg-[#110F0D] border border-[#3D2E1E] rounded-xl p-1 mb-6">
-                <button className="flex-1 bg-[#1A1511] rounded-lg py-2 font-bold text-sm text-white shadow-sm border border-[#3D2E1E]/50">
+             <div className="flex bg-[#110F0D] border border-[#3D2E1E] rounded-[8px] p-1 mb-4">
+                <button className="cursor-pointer flex-1 bg-[#1A1511] rounded-[6px] py-1.5 font-bold text-[13px] text-white shadow-sm border border-[#3D2E1E]/50">
                     Market
                 </button>
-                <button className="flex-1 rounded-lg py-2 font-bold text-sm text-[#A69C8A] hover:text-white transition-colors">
+                <button className="cursor-pointer flex-1 rounded-[6px] py-1.5 font-bold text-[13px] text-[#A69C8A] hover:text-white transition-colors">
                     Limit
                 </button>
             </div>
 
             {/* Amount */}
-            <div className="mb-6">
-                <p className="font-bold mb-3 text-[15px]">Amount</p>
-                <div className="relative mb-3">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A69C8A] font-medium text-lg">$</span>
+            <div className="mb-4">
+                <p className="font-bold mb-2 text-[13px]">Amount</p>
+                <div className="relative mb-2">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A69C8A] font-medium text-[15px]">$</span>
                     <input 
                         type="number" 
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
-                        className="w-full bg-[#110F0D] border border-[#3D2E1E] rounded-xl py-3 pl-8 pr-4 text-white font-mono font-bold text-lg focus:outline-none focus:border-[#00C566] focus:ring-1 focus:ring-[#00C566] transition-all"
+                        className="w-full bg-[#110F0D] border border-[#3D2E1E] rounded-[8px] py-2.5 pl-7 pr-3 text-white font-mono font-bold text-[15px] focus:outline-none focus:border-[#00C566] focus:ring-1 focus:ring-[#00C566] transition-all"
                     />
                 </div>
                 <div className="flex gap-2">
@@ -184,7 +184,7 @@ export function BetModal({
                         <button
                             key={preset}
                             onClick={() => setAmount(preset)}
-                            className="flex-1 bg-[#1A1511] hover:bg-[#3D2E1E] text-white py-2 rounded-lg text-sm font-bold border border-[#3D2E1E]/50 transition-colors"
+                            className="cursor-pointer flex-1 bg-[#1A1511] hover:bg-[#3D2E1E] text-white py-1.5 rounded-[6px] text-[11px] font-bold border border-[#3D2E1E]/50 transition-colors"
                         >
                             ${preset}
                         </button>
@@ -193,22 +193,22 @@ export function BetModal({
             </div>
 
             {/* Receipt Summary */}
-            <div className="space-y-3 mb-6 text-[13px] font-medium font-mono text-[#A69C8A] shrink-0">
+            <div className="space-y-2 mb-4 text-[12px] font-medium font-mono text-[#A69C8A] shrink-0">
                 <div className="flex justify-between items-center">
                     <span>Exchange</span>
                     <span className="text-white flex items-center gap-1.5">
                         <span className="text-[#00C566] font-bold">P</span> Polymarket
                     </span>
                 </div>
-                <div className="flex justify-between items-center bg-[#110F0D] p-3 rounded-md border border-[#3D2E1E]/50">
+                <div className="flex justify-between items-center bg-[#110F0D] p-2 rounded-md border border-[#3D2E1E]/50">
                     <span>Shares</span>
                     <span className="text-white font-bold">{shares}</span>
                 </div>
-                <div className="flex justify-between items-center px-2">
+                <div className="flex justify-between items-center px-1">
                     <span>Avg Price</span>
                     <span className="text-white font-bold">{priceInCents}¢</span>
                 </div>
-                <div className="flex justify-between items-center bg-[#110F0D] p-3 rounded border border-[#00C566]/30">
+                <div className="flex justify-between items-center bg-[#110F0D] p-2 rounded border border-[#00C566]/30">
                     <span>Potential Return</span>
                     <span className="text-[#00C566] font-bold">
                         ${profitDollars > 0 ? profitDollars.toFixed(2) : "0.00"} ({roi}%)
@@ -217,20 +217,20 @@ export function BetModal({
             </div>
 
             {/* Submit Button */}
-            <div className="shrink-0 mt-auto pb-4">
+            <div className="shrink-0 mt-auto pb-2">
                 <button 
                     disabled={isSigning || validAmount <= 0}
-                    className="w-full py-4 rounded-xl font-bold text-lg font-mono shadow-xl transition-transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="cursor-pointer w-full py-3 rounded-[8px] font-bold text-[15px] font-mono shadow-md transition-transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     style={{ backgroundColor: color, color: selectedOutcome === 'YES' ? 'black' : 'white' }}
                     onClick={handlePlaceOrder}
                 >
                     {isSigning ? (
-                        <><Loader2 className="animate-spin" size={20} /> Requesting Signature...</>
+                        <><Loader2 className="animate-spin" size={16} /> Requesting Signature...</>
                     ) : (
                         `Buy ${selectedOutcome} • ${shares} Shares`
                     )}
                 </button>
-                <p className="text-center text-[11px] text-[#A69C8A] mt-3 font-mono">
+                <p className="text-center text-[10px] text-[#A69C8A] mt-2 font-mono">
                     You win ${potentialPayoutDollars.toFixed(2)} if {selectedOutcome}. Max loss: ${validAmount.toFixed(2)}
                 </p>
             </div>

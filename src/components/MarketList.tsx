@@ -76,7 +76,7 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
                     <button
                         key={cat.name}
                         onClick={() => setSelectedCategory(cat.name)}
-                        className={`whitespace-nowrap flex items-center gap-2 px-5 py-2.5 rounded-full font-sans text-[15px] font-medium transition-all shadow-sm ${
+                        className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-1.5 rounded-full font-sans text-[13px] font-medium transition-all shadow-sm cursor-pointer ${
                             selectedCategory === cat.name 
                             ? 'bg-[#110F0D] text-white border border-[#3D2E1E] shadow-[0_4px_12px_rgba(0,0,0,0.5)]' 
                             : 'bg-[#1A1511] text-[#A69C8A] border border-[#3D2E1E]/50 hover:bg-[#110F0D] hover:text-white'

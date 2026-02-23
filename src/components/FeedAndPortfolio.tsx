@@ -34,16 +34,16 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
     <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 pb-24 relative z-10 w-full">
       
       {/* Toggle Markets / Portfolio */}
-      <div className="flex bg-[#110F0D] border border-[#3D2E1E] p-1 rounded-full w-max mb-8">
+      <div className="flex bg-[#110F0D] border border-[#3D2E1E] p-1 rounded-full w-max mb-6">
           <button 
               onClick={() => setActiveTab('markets')}
-              className={`px-6 py-1.5 rounded-full font-medium text-sm transition-all shadow-sm ${activeTab === 'markets' ? 'bg-[#3D2E1E]/50 text-white' : 'text-[#A69C8A] hover:text-white'}`}
+              className={`cursor-pointer px-5 py-1.5 rounded-full font-medium text-[13px] transition-all shadow-sm ${activeTab === 'markets' ? 'bg-[#3D2E1E]/50 text-white' : 'text-[#A69C8A] hover:text-white'}`}
           >
               Markets
           </button>
           <button 
               onClick={() => setActiveTab('portfolio')}
-              className={`px-6 py-1.5 rounded-full font-medium text-sm transition-all shadow-sm ${activeTab === 'portfolio' ? 'bg-[#3D2E1E]/50 text-white' : 'text-[#A69C8A] hover:text-white'}`}
+              className={`cursor-pointer px-5 py-1.5 rounded-full font-medium text-[13px] transition-all shadow-sm ${activeTab === 'portfolio' ? 'bg-[#3D2E1E]/50 text-white' : 'text-[#A69C8A] hover:text-white'}`}
           >
               Portfolio
           </button>
@@ -163,7 +163,7 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
           <div className="fade-in">
               {/* Hero Market (matches the big Forecast Markets feature card) */}
               {heroMarket && (
-                  <div className="w-full bg-[#110F0D] border border-[#3D2E1E] rounded-2xl p-6 sm:p-8 mb-10 flex flex-col lg:flex-row gap-8 shadow-2xl relative overflow-hidden group">
+                  <div className="w-full bg-[#110F0D] border border-[#3D2E1E] rounded-[16px] p-5 sm:p-6 mb-10 flex flex-col lg:flex-row gap-6 shadow-xl relative overflow-hidden group">
                       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00C566] rounded-full blur-[180px] opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity"></div>
                       
                       <div className="flex-1 flex flex-col justify-between relative z-10">
@@ -176,39 +176,39 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
                                       🕒 PolyOracle
                                   </span>
                               </div>
-                              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 leading-tight">
+                              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">
                                   {heroMarket.question}
                               </h2>
-                              <p className="text-[#A69C8A] text-sm mb-6 line-clamp-3 max-w-2xl">
+                              <p className="text-[#A69C8A] text-[13px] mb-4 line-clamp-2 max-w-2xl">
                                   {heroMarket.description || "This market revolves around the outcome specified. The resolution source will be an official consensus or major news network."}
                               </p>
                           </div>
 
-                          <div className="flex gap-8 mt-4 border-t border-[#3D2E1E] py-6">
+                          <div className="flex gap-8 mt-4 border-t border-[#3D2E1E] py-4">
                               <div>
-                                  <p className="text-[#A69C8A] text-xs uppercase tracking-wider mb-1">Volume</p>
-                                  <p className="text-xl font-bold text-white font-mono">${parseInt(heroMarket.volume || "0").toLocaleString()}</p>
+                                  <p className="text-[#A69C8A] text-[11px] uppercase tracking-wider mb-1">Volume</p>
+                                  <p className="text-lg font-bold text-white font-mono">${parseInt(heroMarket.volume || "0").toLocaleString()}</p>
                               </div>
                               <div>
-                                  <p className="text-[#A69C8A] text-xs uppercase tracking-wider mb-1">Exchanges</p>
-                                  <p className="text-xl font-bold text-white font-mono">1</p>
+                                  <p className="text-[#A69C8A] text-[11px] uppercase tracking-wider mb-1">Exchanges</p>
+                                  <p className="text-lg font-bold text-white font-mono">1</p>
                               </div>
                           </div>
 
                           <div className="flex gap-4">
                               <button 
                                   onClick={() => handleHeroBet('YES')}
-                                  className="bg-[#00C566] text-black font-extrabold px-8 py-3 rounded-xl hover:bg-[#00a855] transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,197,102,0.3)] min-w-[120px]"
+                                  className="bg-[#00C566] text-black font-extrabold px-6 py-2.5 rounded-lg hover:bg-[#00a855] transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,197,102,0.3)] min-w-[100px] text-[13px] cursor-pointer"
                               >
                                   Yes {Math.round(heroYesPrice * 100)}¢
                               </button>
                               <button 
                                   onClick={() => handleHeroBet('NO')}
-                                  className="bg-[#E8333A] text-white font-extrabold px-8 py-3 rounded-xl hover:bg-[#c9252c] transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(232,51,58,0.3)] min-w-[120px]"
+                                  className="bg-[#E8333A] text-white font-extrabold px-6 py-2.5 rounded-lg hover:bg-[#c9252c] transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(232,51,58,0.3)] min-w-[100px] text-[13px] cursor-pointer"
                               >
                                   No {100 - Math.round(heroYesPrice * 100)}¢
                               </button>
-                              <button className="text-white hover:text-[#00C566] font-bold px-4 py-3 rounded-xl transition-all flex items-center gap-2 ml-2">
+                              <button className="text-white hover:text-[#00C566] font-bold px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 ml-2 text-[13px] cursor-pointer">
                                   Compare ↗
                               </button>
                           </div>
