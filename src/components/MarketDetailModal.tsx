@@ -54,13 +54,13 @@ export function MarketDetailModal({
             </div>
 
             <div className="flex gap-2">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1A1511] border border-[#3D2E1E] rounded-md text-sm text-[#A69C8A] hover:text-white transition-colors">
+                <button className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-[#1A1511] border border-[#3D2E1E] rounded-[6px] text-[13px] text-[#A69C8A] hover:text-white transition-colors">
                     <ExternalLink size={14} /> Polymarket
                 </button>
-                <button className="p-1.5 bg-[#1A1511] border border-[#3D2E1E] rounded-md text-[#A69C8A] hover:text-white transition-colors">
+                <button className="cursor-pointer p-1.5 bg-[#1A1511] border border-[#3D2E1E] rounded-[6px] text-[#A69C8A] hover:text-white transition-colors">
                     <Share2 size={16} />
                 </button>
-                <button className="p-1.5 bg-[#1A1511] border border-[#3D2E1E] rounded-md text-[#A69C8A] hover:text-white transition-colors">
+                <button className="cursor-pointer p-1.5 bg-[#1A1511] border border-[#3D2E1E] rounded-[6px] text-[#A69C8A] hover:text-white transition-colors">
                     <BookmarkPlus size={16} />
                 </button>
             </div>
@@ -73,9 +73,9 @@ export function MarketDetailModal({
             <div className="flex-1 flex flex-col min-w-0">
                 
                 {/* Chart Header Settings */}
-                <div className="flex items-center gap-1 sm:gap-2 mb-6 pointer-events-none overflow-x-auto hide-scrollbar pb-2">
+                <div className="flex items-center gap-1 mb-4 pointer-events-none overflow-x-auto hide-scrollbar pb-2">
                     {['1H', '6H', '1D', '1W', '1M', 'ALL'].map((tf) => (
-                        <button key={tf} className={`textxs font-bold px-3 py-1.5 rounded-md shrink-0 ${tf === 'ALL' ? 'bg-[#1A1511] text-white border border-[#3D2E1E]' : 'text-[#A69C8A] hover:text-white'}`}>
+                        <button key={tf} className={`cursor-pointer text-[11px] font-bold px-3 py-1.5 rounded-md shrink-0 ${tf === 'ALL' ? 'bg-[#1A1511] text-white border border-[#3D2E1E]' : 'text-[#A69C8A] hover:text-white'}`}>
                             {tf}
                         </button>
                     ))}
@@ -102,11 +102,11 @@ export function MarketDetailModal({
                          const isYes = outcomeName.toLowerCase() === 'yes' || i === 0;
 
                          return (
-                            <div key={i} className="flex justify-between items-center bg-[#110F0D] border border-[#3D2E1E] rounded-xl p-3 hover:border-[#A69C8A]/30 transition-colors">
-                                <span className="font-bold text-white pl-2">{outcomeName}</span>
-                                <div className="flex items-center gap-4">
-                                    <span className="font-bold font-mono text-lg w-12 text-right">{pct}%</span>
-                                    <button className={`px-4 py-2 rounded-md font-bold text-sm ${isYes ? 'bg-[#00C566] text-black hover:bg-[#00a855]' : 'bg-[#E8333A] text-white hover:bg-[#c9252c]'}`}>
+                            <div key={i} className="flex justify-between items-center bg-[#110F0D] border border-[#3D2E1E] rounded-[10px] p-2 hover:border-[#A69C8A]/30 transition-colors">
+                                <span className="font-bold text-white text-[13px] pl-2">{outcomeName}</span>
+                                <div className="flex items-center gap-3">
+                                    <span className="font-bold font-mono text-[15px] w-12 text-right">{pct}%</span>
+                                    <button className={`cursor-pointer px-4 py-1.5 rounded-[6px] font-bold text-[13px] ${isYes ? 'bg-[#00C566] text-black hover:bg-[#00a855]' : 'bg-[#E8333A] text-white hover:bg-[#c9252c]'}`}>
                                         ${parseFloat(currentPrice.toString()).toFixed(2)}
                                     </button>
                                 </div>
@@ -119,15 +119,15 @@ export function MarketDetailModal({
             {/* Right Column (Widget / Sticky) */}
             <div className="w-full lg:w-[360px] shrink-0 mt-6 lg:mt-0 xl:w-[420px]">
                 <div className="sticky top-6 border border-[#3D2E1E] bg-[#110F0D] rounded-xl overflow-hidden shadow-base">
-                    <div className="p-3 sm:p-4 border-b border-[#3D2E1E] font-bold text-lg flex justify-between bg-[#0B0A08]">
+                    <div className="p-3 sm:p-4 border-b border-[#3D2E1E] font-bold text-[15px] flex justify-between bg-[#0B0A08]">
                         <span>Order Widget</span>
                          <span className="text-[#00C566]">Auto</span>
                     </div>
-                    <div className="p-4 sm:p-6">
+                    <div className="p-4 sm:p-5">
                        {/* Clone Buy/Sell toggle */}
-                       <div className="flex gap-4 border-b border-[#3D2E1E] pb-3 mb-6 font-bold text-lg">
-                           <button className="text-white border-b-2 border-white pb-2 px-2">Buy</button>
-                           <button className="text-[#A69C8A] hover:text-white px-2">Sell</button>
+                       <div className="flex gap-4 border-b border-[#3D2E1E] pb-3 mb-5 font-bold text-[15px]">
+                           <button className="cursor-pointer text-white border-b-2 border-white pb-2 px-2">Buy</button>
+                           <button className="cursor-pointer text-[#A69C8A] hover:text-white px-2">Sell</button>
                        </div>
 
                        {/* Clone Outcomes Selectors inside Widget */}
@@ -141,8 +141,8 @@ export function MarketDetailModal({
                                 const isYes = outcomeName.toLowerCase() === 'yes' || i === 0;
 
                                 return (
-                                    <button key={i} className={`p-4 rounded-xl border font-bold text-[15px] flex flex-col items-center justify-center transition-all ${isYes ? 'border-[#00C566] bg-[#00C566]/10 text-[#00C566] shadow-[0_4px_15px_rgba(0,197,102,0.15)]' : 'border-[#3D2E1E] text-[#E8333A] bg-[#0B0A08] hover:border-[#E8333A]/50'}`}>
-                                        <span className="text-white mb-1">{outcomeName}</span> 
+                                    <button key={i} className={`cursor-pointer p-3 rounded-[8px] border font-bold text-[13px] flex flex-col items-center justify-center transition-all ${isYes ? 'border-[#00C566] bg-[#00C566]/10 text-[#00C566] shadow-[0_4px_15px_rgba(0,197,102,0.15)]' : 'border-[#3D2E1E] text-[#E8333A] bg-[#0B0A08] hover:border-[#E8333A]/50'}`}>
+                                        <span className="text-white mb-0.5 text-[11px]">{outcomeName}</span> 
                                         {pct}¢
                                     </button>
                                 );
@@ -158,9 +158,9 @@ export function MarketDetailModal({
                            <span className="text-xs text-[#00C566] tracking-wide font-bold">Polymarket</span>
                        </div>
                        
-                       <p className="text-xs text-center text-slate-500 mb-3">Simulated Demo Order.</p>
+                       <p className="text-[11px] text-center text-slate-500 mb-3">Simulated Demo Order.</p>
 
-                       <button className="w-full bg-[#00C566] hover:bg-[#00a855] text-black font-extrabold py-4 rounded-xl shadow-[0_0_20px_rgba(0,197,102,0.3)] text-lg transition-transform active:scale-[0.98]">
+                       <button className="cursor-pointer w-full bg-[#00C566] hover:bg-[#00a855] text-black font-extrabold py-3 rounded-[8px] shadow-[0_0_20px_rgba(0,197,102,0.3)] text-[15px] transition-transform active:scale-[0.98]">
                            Place Order
                        </button>
 
