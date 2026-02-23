@@ -2,7 +2,18 @@ import { Market } from './types';
 
 const GAMMA_API_URL = 'https://gamma-api.polymarket.com';
 
-const AFRICAN_KEYWORDS = ['nigeria', 'afcon', 'africa', 'naira', 'kenya', 'south africa', 'ghana', 'tinubu', 'egypt', 'brics', 'rwand', 'uganda', 'tanzania', 'lagos', 'abuja', 'ramaphosa', 'ruto'];
+const AFRICAN_KEYWORDS = [
+    'africa', 'african', 'algeria', 'angola', 'benin', 'botswana', 'burkina faso', 'burundi', 
+    'cabo verde', 'cape verde', 'cameroon', 'central african republic', 'chad', 'comoros', 
+    'congo', "cote d'ivoire", 'ivory coast', 'djibouti', 'egypt', 'equatorial guinea', 
+    'eritrea', 'eswatini', 'swaziland', 'ethiopia', 'gabon', 'gambia', 'ghana', 'guinea', 
+    'guinea-bissau', 'kenya', 'lesotho', 'liberia', 'libya', 'madagascar', 'malawi', 'mali', 
+    'mauritania', 'mauritius', 'morocco', 'mozambique', 'namibia', 'niger', 'nigeria', 
+    'rwanda', 'sao tome and principe', 'senegal', 'seychelles', 'sierra leone', 'somalia', 
+    'south africa', 'south sudan', 'sudan', 'tanzania', 'togo', 'tunisia', 'uganda', 'zambia', 
+    'zimbabwe', 'afcon', 'ecowas', 'naira', 'cedi', 'rand', 'shilling', 'lagos', 'abuja', 
+    'nairobi', 'johannesburg', 'cairo', 'addis ababa', 'tinubu', 'ramaphosa', 'ruto'
+];
 
 /**
  * Helper to categorize markets for the UI
