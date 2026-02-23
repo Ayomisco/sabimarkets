@@ -2,7 +2,7 @@ import { Market } from './types';
 
 const GAMMA_API_URL = 'https://gamma-api.polymarket.com';
 
-const AFRICAN_KEYWORDS = ['nigeria', 'afcon', 'africa', 'naira', 'kenya', 'south africa', 'ghana', 'tinubu', 'egypt', 'brics'];
+const AFRICAN_KEYWORDS = ['nigeria', 'afcon', 'africa', 'naira', 'kenya', 'south africa', 'ghana', 'tinubu', 'egypt', 'brics', 'rwand', 'uganda', 'tanzania', 'lagos', 'abuja', 'ramaphosa', 'ruto'];
 
 /**
  * Helper to categorize markets for the UI
@@ -11,8 +11,8 @@ function assignCategory(market: Market): string {
     const q = (market.question + ' ' + (market.description || '')).toLowerCase();
     
     // Explicit exclusions or overrides
-    if (q.includes('crypto') || q.includes('bitcoin') || q.includes('btc') || q.includes('eth') || q.includes('solana') || q.includes('airdrop') || q.includes('nft')) return 'Crypto';
-    if (q.includes('election') || q.includes('president') || q.includes('policy') || q.includes('tinubu') || q.includes('trump') || q.includes('biden')) return 'Politics';
+    if (q.includes('crypto') || q.includes('bitcoin') || q.includes('btc') || q.includes('eth') || q.includes('solana') || q.includes('airdrop') || q.includes('nft') || q.includes('doge')) return 'Crypto';
+    if (q.includes('election') || q.includes('president') || q.includes('policy') || q.includes('tinubu') || q.includes('trump') || q.includes('biden') || q.includes('harris')) return 'Politics';
     if (q.includes('football') || q.includes('afcon') || q.includes('sports') || q.includes('match') || q.includes('team') || q.includes('nfl') || q.includes('nba')) return 'Sports';
     if (q.includes('rate') || q.includes('inflation') || q.includes('naira') || q.includes('usd') || q.includes('economy') || q.includes('fed')) return 'Economy';
     if (q.includes('movie') || q.includes('artist') || q.includes('award') || q.includes('music') || q.includes('oscars') || q.includes('grammy')) return 'Entertainment';
@@ -22,8 +22,8 @@ function assignCategory(market: Market): string {
 
 export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: string })[]> {
   try {
-    // Fetch a large pool of active markets
-    const res = await fetch(`${GAMMA_API_URL}/markets?active=true&closed=false&limit=100`, {
+    // Fetch a massive pool of active markets to sift through
+    const res = await fetch(`${GAMMA_API_URL}/markets?active=true&closed=false&limit=300`, {
       next: { revalidate: 60 } 
     });
     
@@ -47,9 +47,13 @@ export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: str
     });
 
     // To ensure UI has at least 50 highly active markets, we add generic global markets.
-    // We intentionally avoid markets with string "USA" or specific overly-american niche things if we can,
-    // to give it a truly "Generic / Global / African" feel as requested.
-    const avoidKeywords = ['usa ', 'california', 'new york', 'super bowl', 'trump', 'biden', 'american', 'nfl', 'nba', 'democrat', 'republican', 'senate', 'congress', 'united states', 'uk', 'london', 'china', 'russia', 'taylor swift'];
+    // We heavily filter out specific US stuff that plagues polymarket
+    const avoidKeywords = [
+        'usa ', 'california', 'new york', 'super bowl', 'trump', 'biden', 'american', 'nfl', 'nba', 
+        'democrat', 'republican', 'senate', 'congress', 'united states', 'uk', 'london', 'china', 
+        'russia', 'taylor swift', 'harris', 'fed', 'fomc', 'kamala', 'u.s.', 'revenue', 'donna', 
+        'israel', 'gaza', 'ukraine', 'putin', 'fbi', 'cnn', 'fox'
+    ];
     
     const backfillCount = 40 - strictAfrican.length;
     const paddingMarkets = backfillCount > 0 
