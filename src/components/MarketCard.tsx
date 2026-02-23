@@ -39,9 +39,13 @@ export function MarketCard({ market, index, onMarketClick, onBetClick }: MarketC
     >
       <div className="p-5 flex-1 flex flex-col relative">
         <div className="flex items-start justify-between mb-4">
-            {/* Fake Avatar Logo (Polymarket default) */}
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 border border-slate-200">
-                <span className="text-blue-600 text-xs font-bold">🌍</span>
+            {/* Avatar Logo */}
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 border border-slate-200 overflow-hidden">
+                {market.icon ? (
+                   <img src={market.icon} alt="Market Icon" className="w-full h-full object-cover" />
+                ) : (
+                   <span className="text-blue-600 text-xs font-bold">🌍</span>
+                )}
             </div>
 
             {/* Hot Badge */}

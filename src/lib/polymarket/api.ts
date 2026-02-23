@@ -49,7 +49,7 @@ export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: str
     // To ensure UI has at least 50 highly active markets, we add generic global markets.
     // We intentionally avoid markets with string "USA" or specific overly-american niche things if we can,
     // to give it a truly "Generic / Global / African" feel as requested.
-    const avoidKeywords = ['usa ', 'california', 'new york', 'super bowl'];
+    const avoidKeywords = ['usa ', 'california', 'new york', 'super bowl', 'trump', 'biden', 'american', 'nfl', 'nba', 'democrat', 'republican', 'senate', 'congress', 'united states', 'uk', 'london', 'china', 'russia', 'taylor swift'];
     
     const backfillCount = 40 - strictAfrican.length;
     const paddingMarkets = backfillCount > 0 

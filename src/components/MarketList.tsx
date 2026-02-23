@@ -7,6 +7,7 @@ import { MarketCard } from "./MarketCard";
 import { Market } from "@/lib/polymarket/types";
 import { BetModal } from "./BetModal";
 import { MarketDetailModal } from "./MarketDetailModal";
+import { Flame, Globe, Bitcoin, Landmark, Trophy, TrendingUp, Clapperboard } from "lucide-react";
 
 export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiCategory: string })[] }) {
     const { setSubscribeTokens } = useMarketStore();
@@ -40,13 +41,13 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
     }, [initialMarkets, setSubscribeTokens]);
 
     const categories = [
-        { name: "All", icon: "🔥" },
-        { name: "Global", icon: "�" },
-        { name: "Crypto", icon: "🪙" },
-        { name: "Politics", icon: "🏛️" },
-        { name: "Sports", icon: "⚽" },
-        { name: "Economy", icon: "📈" },
-        { name: "Entertainment", icon: "�" }
+        { name: "All", icon: <Flame size={16} className={selectedCategory === "All" ? "text-orange-500" : ""} /> },
+        { name: "Global", icon: <Globe size={16} /> },
+        { name: "Crypto", icon: <Bitcoin size={16} /> },
+        { name: "Politics", icon: <Landmark size={16} /> },
+        { name: "Sports", icon: <Trophy size={16} /> },
+        { name: "Economy", icon: <TrendingUp size={16} /> },
+        { name: "Entertainment", icon: <Clapperboard size={16} /> }
     ];
 
     const filteredMarkets = selectedCategory === "All" 
