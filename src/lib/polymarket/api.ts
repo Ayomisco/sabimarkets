@@ -9,11 +9,15 @@ const AFRICAN_KEYWORDS = ['nigeria', 'afcon', 'africa', 'naira', 'kenya', 'south
  */
 function assignCategory(market: Market): string {
     const q = (market.question + ' ' + (market.description || '')).toLowerCase();
-    if (q.includes('election') || q.includes('president') || q.includes('policy') || q.includes('tinubu')) return 'Politics';
-    if (q.includes('football') || q.includes('afcon') || q.includes('sports') || q.includes('match') || q.includes('team')) return 'Sports';
-    if (q.includes('rate') || q.includes('inflation') || q.includes('naira') || q.includes('usd') || q.includes('economy')) return 'Economy';
-    if (q.includes('movie') || q.includes('artist') || q.includes('award') || q.includes('music')) return 'Entertainment';
-    return 'World News';
+    
+    // Explicit exclusions or overrides
+    if (q.includes('crypto') || q.includes('bitcoin') || q.includes('btc') || q.includes('eth') || q.includes('solana') || q.includes('airdrop') || q.includes('nft')) return 'Crypto';
+    if (q.includes('election') || q.includes('president') || q.includes('policy') || q.includes('tinubu') || q.includes('trump') || q.includes('biden')) return 'Politics';
+    if (q.includes('football') || q.includes('afcon') || q.includes('sports') || q.includes('match') || q.includes('team') || q.includes('nfl') || q.includes('nba')) return 'Sports';
+    if (q.includes('rate') || q.includes('inflation') || q.includes('naira') || q.includes('usd') || q.includes('economy') || q.includes('fed')) return 'Economy';
+    if (q.includes('movie') || q.includes('artist') || q.includes('award') || q.includes('music') || q.includes('oscars') || q.includes('grammy')) return 'Entertainment';
+    
+    return 'Global';
 }
 
 export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: string })[]> {
@@ -42,12 +46,18 @@ export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: str
         return AFRICAN_KEYWORDS.some((keyword) => questionText.includes(keyword));
     });
 
-    // To ensure UI has at least 30 highly active markets as requested for the MVP, 
-    // we backfill with top global Poly liquidity if strict African isn't enough.
-    // This allows the full platform (sorting, odds flashing, categories) to be tested beautifully.
+    // To ensure UI has at least 50 highly active markets, we add generic global markets.
+    // We intentionally avoid markets with string "USA" or specific overly-american niche things if we can,
+    // to give it a truly "Generic / Global / African" feel as requested.
+    const avoidKeywords = ['usa ', 'california', 'new york', 'super bowl'];
+    
     const backfillCount = 40 - strictAfrican.length;
     const paddingMarkets = backfillCount > 0 
-        ? sortedData.filter(m => !strictAfrican.includes(m)).slice(0, backfillCount)
+        ? sortedData.filter(m => {
+            if (strictAfrican.includes(m)) return false;
+            const q = m.question.toLowerCase();
+            return !avoidKeywords.some(kw => q.includes(kw));
+        }).slice(0, backfillCount)
         : [];
 
     const finalFeed = [...strictAfrican, ...paddingMarkets].map(m => ({

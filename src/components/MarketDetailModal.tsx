@@ -83,7 +83,7 @@ export function MarketDetailModal({
 
                 {/* Real Interactive Graph */}
                 <div className="h-[300px] w-full relative mb-8 flex flex-col justify-end">
-                    <MarketChart currentYesPrice={currentYesPrice} />
+                    <MarketChart currentYesPrice={currentYesPrice} yesTokenId={tokenId} />
                 </div>
 
                 {/* Outcomes Table List */}

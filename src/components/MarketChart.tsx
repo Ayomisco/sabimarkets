@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import {
   LineChart,
   Line,
@@ -13,38 +13,80 @@ import {
 
 interface ChartProps {
   currentYesPrice: number;
+  yesTokenId?: string;
 }
 
-export default function MarketChart({ currentYesPrice }: ChartProps) {
-  // Generate highly realistic mock historical data that accurately ends at the current live price
-  const data = useMemo(() => {
-    const points = [];
-    let currentVal = currentYesPrice * 100;
+export default function MarketChart({ currentYesPrice, yesTokenId }: ChartProps) {
+  const [data, setData] = useState<{date: string, Yes: number, No: number}[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    // Generate 30 days of data backwards
-    for (let i = 30; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        
-        // Add random market noise
-        const noise = (Math.random() - 0.5) * 8; // Max 8% swing
-        let yesPrice = currentVal + noise;
-        
-        // Constrain between 1 and 99
-        yesPrice = Math.max(1, Math.min(99, yesPrice));
-        
-        // Ensure the final data point perfectly matches current live odds
-        if (i === 0) yesPrice = currentYesPrice * 100; 
+  useEffect(() => {
+    async function fetchHistory() {
+      if (!yesTokenId) {
+         // Fallback generator if no token ID is available
+         generateMockData();
+         return;
+      }
 
-        points.push({
-            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            Yes: yesPrice,
-            No: 100 - yesPrice,
-        });
-        currentVal = yesPrice;
+      try {
+        const res = await fetch(`https://clob.polymarket.com/prices-history?interval=1d&market=${yesTokenId}&fidelity=10`);
+        const json = await res.json();
+        
+        if (json.history && json.history.length > 0) {
+            const points = json.history.map((pt: {t: number, p: number}) => {
+                const date = new Date(pt.t * 1000);
+                const yesPrice = pt.p * 100;
+                return {
+                    date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                    Yes: yesPrice,
+                    No: 100 - yesPrice,
+                };
+            });
+            // Ensure the last point strictly matches our current live feed price
+            points.push({
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                Yes: currentYesPrice * 100,
+                No: 100 - (currentYesPrice * 100),
+            });
+            setData(points);
+        } else {
+            generateMockData();
+        }
+      } catch (e) {
+        console.error("Failed to fetch graph history", e);
+        generateMockData();
+      } finally {
+        setLoading(false);
+      }
     }
-    return points;
-  }, [currentYesPrice]);
+
+    function generateMockData() {
+        const points = [];
+        let currentVal = currentYesPrice * 100;
+        for (let i = 30; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const noise = (Math.random() - 0.5) * 8;
+            let yesPrice = currentVal + noise;
+            yesPrice = Math.max(1, Math.min(99, yesPrice));
+            if (i === 0) yesPrice = currentYesPrice * 100; 
+            points.push({
+                date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                Yes: yesPrice,
+                No: 100 - yesPrice,
+            });
+            currentVal = yesPrice;
+        }
+        setData(points);
+        setLoading(false);
+    }
+
+    fetchHistory();
+  }, [yesTokenId, currentYesPrice]);
+
+  if (loading) {
+     return <div className="w-full h-full flex items-center justify-center font-mono text-sm text-[#A69C8A] animate-pulse">Loading Live Chart...</div>;
+  }
 
   return (
     <div className="w-full h-[300px] min-h-[300px] -ml-4">
@@ -82,8 +124,8 @@ export default function MarketChart({ currentYesPrice }: ChartProps) {
                  boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
              }}
              itemStyle={{ fontWeight: 'bold' }}
-             formatter={(value: number, name: string) => [
-                 `${value.toFixed(1)}¢`, 
+             formatter={(value: any, name: any) => [
+                 `${Number(value).toFixed(1)}¢`, 
                  name
              ]}
              labelStyle={{ color: '#A69C8A', marginBottom: '8px' }}

@@ -41,11 +41,12 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
 
     const categories = [
         { name: "All", icon: "🔥" },
+        { name: "Global", icon: "�" },
+        { name: "Crypto", icon: "🪙" },
         { name: "Politics", icon: "🏛️" },
         { name: "Sports", icon: "⚽" },
         { name: "Economy", icon: "📈" },
-        { name: "Entertainment", icon: "🎬" },
-        { name: "World News", icon: "🌍" }
+        { name: "Entertainment", icon: "�" }
     ];
 
     const filteredMarkets = selectedCategory === "All" 

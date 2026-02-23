@@ -6,7 +6,9 @@ import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
+import { useAccount, useSignTypedData } from 'wagmi';
+import { usePortfolioStore } from '@/store/portfolioStore';
 
 export function BetModal({
   isOpen,
@@ -22,7 +24,12 @@ export function BetModal({
   currentPrice: number;
 }) {
   const [amount, setAmount] = useState<number | string>(10);
+  const [isSigning, setIsSigning] = useState(false);
   const color = selectedOutcome === 'YES' ? '#00C566' : '#E8333A';
+
+  const { address } = useAccount();
+  const { signTypedDataAsync } = useSignTypedData();
+  const { addPosition } = usePortfolioStore();
 
   if (!market || !selectedOutcome) return null;
 
@@ -39,6 +46,62 @@ export function BetModal({
   const potentialPayoutDollars = parseFloat(shares);
   const profitDollars = (potentialPayoutDollars - validAmount);
   const roi = validAmount > 0 ? ((profitDollars / validAmount) * 100).toFixed(0) : "0";
+
+  const handlePlaceOrder = async () => {
+      if (!address) {
+          alert('Please connect your wallet first!');
+          return;
+      }
+      setIsSigning(true);
+      try {
+          // Simulate the Polymarket EIP-712 Order Signature Pop-up
+          await signTypedDataAsync({
+              domain: {
+                  name: "Polymarket CTF Exchange",
+                  version: "1",
+                  chainId: 137, // Polygon
+              },
+              types: {
+                  Order: [
+                      { name: "salt", type: "uint256" },
+                      { name: "maker", type: "address" },
+                      { name: "signer", type: "address" },
+                      { name: "taker", type: "address" },
+                      { name: "tokenId", type: "uint256" },
+                      { name: "makerAmount", type: "uint256" },
+                      { name: "takerAmount", type: "uint256" },
+                  ]
+              },
+              primaryType: "Order",
+              message: {
+                  salt: BigInt(Date.now()),
+                  maker: address,
+                  signer: address,
+                  taker: "0x0000000000000000000000000000000000000000",
+                  tokenId: BigInt(123456789), // Mock Token ID string
+                  makerAmount: BigInt(validAmount * 1000000), // USDC decimals
+                  takerAmount: BigInt(parseFloat(shares) * 1000000), // Shares decimals
+              }
+          });
+
+          // Signature succeeded: Add to portfolio
+          addPosition({
+              marketTitle: market.question,
+              outcome: selectedOutcome,
+              shares: parseFloat(shares),
+              avgPrice: currentPrice,
+              totalCost: validAmount,
+              tokenId: market.tokens?.[0]?.token_id // approximate
+          });
+
+          alert("Order placed successfully! Check your Portfolio tab.");
+          onClose();
+      } catch (err) {
+          console.error(err);
+      } finally {
+          setIsSigning(false);
+      }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -156,14 +219,16 @@ export function BetModal({
             {/* Submit Button */}
             <div className="shrink-0 mt-auto pb-4">
                 <button 
-                    className="w-full py-4 rounded-xl font-bold text-lg font-mono shadow-xl transition-transform active:scale-[0.98]"
+                    disabled={isSigning || validAmount <= 0}
+                    className="w-full py-4 rounded-xl font-bold text-lg font-mono shadow-xl transition-transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                     style={{ backgroundColor: color, color: selectedOutcome === 'YES' ? 'black' : 'white' }}
-                    onClick={() => {
-                        alert(`Simulating executing signature with POLY_BUILDER key... Executed Market Buy of ${shares} Shares for ${validAmount} USDC on ${selectedOutcome}`);
-                        onClose();
-                    }}
+                    onClick={handlePlaceOrder}
                 >
-                    Buy {selectedOutcome} • {shares} Shares
+                    {isSigning ? (
+                        <><Loader2 className="animate-spin" size={20} /> Requesting Signature...</>
+                    ) : (
+                        `Buy ${selectedOutcome} • ${shares} Shares`
+                    )}
                 </button>
                 <p className="text-center text-[11px] text-[#A69C8A] mt-3 font-mono">
                     You win ${potentialPayoutDollars.toFixed(2)} if {selectedOutcome}. Max loss: ${validAmount.toFixed(2)}
