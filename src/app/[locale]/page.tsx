@@ -40,12 +40,7 @@ export default async function HomePage() {
           {/* Logo */}
           <a href="/" className="flex items-center gap-2 shrink-0">
             {/* SVG Logo Mark */}
-            <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0"
-                 style={{ background: 'linear-gradient(135deg, #00D26A 0%, #009A4E 100%)' }}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 1L3 7.5H7L6 13L11 6.5H7L8 1Z" fill="black" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+            <img src="/logo-icon.svg" alt="SabiMarkets" className="w-8 h-8 shrink-0" />
             <span className="text-[15px] font-bold text-white tracking-tight hidden sm:inline">
               Sabi<span className="text-[#00D26A]">Markets</span>
             </span>

@@ -77,9 +77,7 @@ export default function SettingsPage() {
         <div className="max-w-[1200px] mx-auto flex items-center justify-between px-4 sm:px-6 h-14">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br from-[#00D26A] to-[#009A4E]">
-                <Zap size={14} className="text-black" fill="black" />
-              </div>
+              <img src="/logo-icon.svg" alt="SabiMarkets" className="w-8 h-8 shrink-0" />
               <span className="text-[15px] font-bold text-white tracking-tight">
                 Sabi<span className="text-[#00D26A]">Markets</span>
               </span>
