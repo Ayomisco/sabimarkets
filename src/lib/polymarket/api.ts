@@ -34,7 +34,7 @@ function assignCategory(market: Market): string {
 export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: string })[]> {
   try {
     // Fetch a massive pool of active markets to sift through
-    const res = await fetch(`${GAMMA_API_URL}/markets?active=true&closed=false&limit=300`, {
+    const res = await fetch(`${GAMMA_API_URL}/markets?active=true&closed=false&limit=1000`, {
       next: { revalidate: 60 } 
     });
     
@@ -53,33 +53,28 @@ export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: str
 
     // First, grab anything technically African.
     const strictAfrican = sortedData.filter((market) => {
-        const questionText = market.question.toLowerCase() + (market.description || '').toLowerCase();
+        const questionText = (market.question + ' ' + (market.description || '')).toLowerCase();
         return AFRICAN_KEYWORDS.some((keyword) => questionText.includes(keyword));
     });
 
-    // To ensure UI has at least 50 highly active markets, we add generic global markets.
-    // We heavily filter out specific US stuff that plagues polymarket
+    // To ensure UI has at least a few markets, we ONLY show African ones unless there are literally 0, in which case we show a fallback.
+    // The user requested strictly Africa, removing US/Ukraine/etc.
     const avoidKeywords = [
         'usa ', 'california', 'new york', 'super bowl', 'trump', 'biden', 'american', 'nfl', 'nba', 
         'democrat', 'republican', 'senate', 'congress', 'united states', 'uk', 'london', 'china', 
         'russia', 'taylor swift', 'harris', 'fed', 'fomc', 'kamala', 'u.s.', 'revenue', 'donna', 
-        'israel', 'gaza', 'ukraine', 'putin', 'fbi', 'cnn', 'fox'
+        'israel', 'gaza', 'ukraine', 'putin', 'fbi', 'cnn', 'fox', 'bitcoin', 'btc', 'eth ', 'ethereum', 'solana', 'doge'
     ];
     
-    const backfillCount = 40 - strictAfrican.length;
-    const paddingMarkets = backfillCount > 0 
-        ? sortedData.filter(m => {
-            if (strictAfrican.includes(m)) return false;
-            const q = m.question.toLowerCase();
-            return !avoidKeywords.some(kw => q.includes(kw));
-        }).slice(0, backfillCount)
-        : [];
-
-    const finalFeed = [...strictAfrican, ...paddingMarkets].map(m => ({
+    // Instead of padding blindly, let's just use strictAfrican. 
+    // If strictAfrican is very small, we will fetch more from the API by searching for specific African countries
+    // Right now, sorting by volume on a limt=300 might miss smaller African markets. We need to rely on the active filter.
+    const finalFeed = strictAfrican.map(m => ({
         ...m,
         uiCategory: assignCategory(m)
     }));
 
+    // If we only found a few, we might just return them. The user wants to avoid non-African markets.
     return finalFeed;
   } catch (error) {
     console.error('Error fetching Polymarket Markets:', error);

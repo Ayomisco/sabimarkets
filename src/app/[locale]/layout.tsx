@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages} from 'next-intl/server';
 import {notFound} from 'next/navigation';
@@ -5,6 +6,14 @@ import {routing} from '@/i18n/routing';
 import '../globals.css'; // Make sure styling is imported
 
 import { Providers } from '@/components/Providers';
+
+export const metadata: Metadata = {
+  icons: {
+    icon: '/logo-icon.svg',
+    shortcut: '/logo-icon.svg',
+    apple: '/logo-icon.svg',
+  },
+};
 
 export default async function LocaleLayout({
   children,
@@ -20,7 +29,6 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
-
   return (
     <html lang={locale}>
       <body className="bg-[#080706] text-[#F0EBE1] min-h-screen antialiased">
