@@ -1,10 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 import { fetchAfricanMarkets } from '@/lib/polymarket/api';
-import { MarketList } from '@/components/MarketList';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Search, Bell } from 'lucide-react';
-import { MarketCard } from '@/components/MarketCard';
+import { Search, Bell, TrendingUp, Zap } from 'lucide-react';
 import Marquee from '@/components/Marquee';
 import { FeedAndPortfolio } from '@/components/FeedAndPortfolio';
 
@@ -15,60 +13,75 @@ export default async function HomePage() {
   const heroMarket = markets.length > 0 ? markets[0] : null;
   const feedMarkets = markets.length > 0 ? markets.slice(1) : [];
   
-  // Hero Analytics Math
   const heroYesPriceStr = heroMarket?.outcomePrices && Array.isArray(heroMarket.outcomePrices) 
     ? heroMarket.outcomePrices[0] 
     : "0.5";
   const heroYesPrice = parseFloat(heroYesPriceStr);
 
   return (
-    <main className="flex flex-col min-h-screen bg-[#0B0A08] text-[#E0D5C1] font-sans antialiased selection:bg-[#00C566]/30">
+    <main className="flex flex-col min-h-screen bg-[#080706] text-[#F0EBE1] font-sans antialiased selection:bg-[#00D26A]/20">
       
-      {/* African Cyberpunk Grid Background */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.15]" style={{
-        backgroundImage: `linear-gradient(to right, #3D2E1E 1px, transparent 1px), linear-gradient(to bottom, #3D2E1E 1px, transparent 1px)`,
-        backgroundSize: '40px 40px',
-        maskImage: 'linear-gradient(to bottom, black 20%, transparent 80%)'
-      }} />
+      {/* Ambient background glow effects */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {/* Top left green glow */}
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full opacity-[0.04]" 
+             style={{ background: 'radial-gradient(circle, #00D26A 0%, transparent 70%)' }} />
+        {/* Bottom right warm amber glow */}
+        <div className="absolute -bottom-40 -right-20 w-[500px] h-[500px] rounded-full opacity-[0.03]" 
+             style={{ background: 'radial-gradient(circle, #F5A623 0%, transparent 70%)' }} />
+        {/* Subtle grid lines */}
+        <div className="absolute inset-0 opacity-[0.04]" style={{
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px)`,
+          backgroundSize: '60px 60px'
+        }} />
+      </div>
 
-      {/* Header - Forecast Markets Clone Style */}
-      <header className="relative z-50 flex items-center justify-between px-6 py-3 w-full border-b border-[#3D2E1E] bg-[#0B0A08]/90 backdrop-blur-md">
-        
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tighter text-white font-mono shrink-0">
-                <span className="text-[#00C566] text-2xl">⚡Sabi</span>Markets
-            </h1>
-        </div>
-
-        {/* Search Bar (Centered) */}
-        <div className="hidden md:flex flex-1 max-w-xl mx-8 relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[#A69C8A]">
-                <Search size={18} />
+      {/* ─── NAVBAR ─── */}
+      <header className="sticky top-0 z-50 w-full border-b border-white/[0.06] bg-[#080706]/80 backdrop-blur-xl">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 sm:px-6 h-14">
+          
+          {/* Logo */}
+          <a href="/" className="flex items-center gap-2 shrink-0">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" 
+                 style={{ background: 'linear-gradient(135deg, #00D26A, #009A4E)' }}>
+              <Zap size={14} className="text-black" fill="black" />
             </div>
+            <span className="text-[15px] font-bold text-white tracking-tight">
+              Sabi<span className="text-[#00D26A]">Markets</span>
+            </span>
+            <span className="hidden sm:inline text-[9px] font-bold text-[#7A7068] bg-white/[0.06] border border-white/[0.08] px-1.5 py-0.5 rounded-full uppercase tracking-widest ml-1">
+              Africa
+            </span>
+          </a>
+
+          {/* Search Bar */}
+          <div className="hidden md:flex flex-1 max-w-[440px] mx-8 relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A7068] pointer-events-none" />
             <input 
-                type="text" 
-                placeholder="Search markets..." 
-                className="w-full bg-[#1A1511] border border-[#3D2E1E] text-white text-sm rounded-full pl-10 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#00C566] focus:border-[#00C566] transition-all placeholder:text-[#8B7D6B]"
+              type="text" 
+              placeholder="Search markets, events, teams..."
+              className="w-full bg-white/[0.04] border border-white/[0.08] text-white text-[13px] rounded-full pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#00D26A]/50 focus:border-[#00D26A]/30 transition-all placeholder:text-[#7A7068]"
             />
-        </div>
+          </div>
 
-        {/* Right Actions */}
-        <div className="flex gap-4 items-center shrink-0">
+          {/* Right Actions */}
+          <div className="flex items-center gap-2 shrink-0">
             <LanguageSwitcher />
-            <div className="relative cursor-pointer text-[#A69C8A] hover:text-white transition-colors p-2 bg-[#1A1511] rounded-full hidden sm:block">
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-[#E8333A] rounded-full animate-pulse"></span>
-            </div>
+            <button className="relative p-2 text-[#7A7068] hover:text-white transition-colors rounded-lg hover:bg-white/[0.05] hidden sm:flex">
+              <Bell size={18} />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#FF4560] rounded-full animate-pulse" />
+            </button>
             <ConnectButton showBalance={false} chainStatus="none" accountStatus="address" />
+          </div>
         </div>
       </header>
 
-      {/* Ticker Tape */}
-      <div className="w-full border-b border-[#3D2E1E] bg-[#110F0D] py-2 overflow-hidden relative z-40">
-        <Marquee markets={markets.slice(0, 10)} />
+      {/* ─── LIVE TICKER ─── */}
+      <div className="w-full border-b border-white/[0.05] bg-[#0A0908]/60 overflow-hidden py-2">
+        <Marquee markets={markets.slice(0, 12)} />
       </div>
 
+      {/* ─── MAIN CONTENT ─── */}
       <FeedAndPortfolio 
         heroMarket={heroMarket} 
         feedMarkets={feedMarkets} 

@@ -8,55 +8,48 @@ export default function Marquee({ markets }: { markets: Market[] }) {
   
   if (!markets || markets.length === 0) return null;
 
+  const items = [...markets, ...markets]; // double for seamless loop
+
   return (
-    <div className="flex w-full whitespace-nowrap overflow-hidden group py-1 border-y border-[#3D2E1E]/50 bg-[#1A1511]">
-      <div className="animate-marquee flex gap-12 group-hover:[animation-play-state:paused] whitespace-nowrap px-6">
-        {markets.map((m, i) => {
-          const yesAssetId = m.tokens?.[0]?.token_id;
-          let currentPrice = parseFloat(m.outcomePrices?.[0] || "0.5");
-          if (yesAssetId && livePrices[yesAssetId] !== undefined) {
-              currentPrice = livePrices[yesAssetId];
-          }
+    <div className="flex w-full whitespace-nowrap overflow-hidden group">
+      <div className="animate-marquee flex gap-10 group-hover:[animation-play-state:paused] whitespace-nowrap pl-6">
+        {items.map((m, i) => {
+          const tokenId = m.tokens?.[0]?.token_id;
+          const livePrice = tokenId && livePrices[tokenId] !== undefined 
+            ? livePrices[tokenId] 
+            : parseFloat(m.outcomePrices?.[0] || "0.5");
+          const pct = Math.round(livePrice * 100);
+          
+          // Simulate price change for display
+          const isUp = pct > 50;
 
           return (
-            <span key={`mq1-${i}`} className="text-white text-xs font-mono font-medium flex items-center gap-2">
-              <span className="text-[#A69C8A] max-w-[200px] truncate block">{m.question.substring(0, 40)}...</span>
-              <span className="text-[#00C566]">
-                {Math.round(currentPrice * 100)}¢
+            <span key={`mq-${i}`} className="inline-flex items-center gap-2.5 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity">
+              {/* Market icon */}
+              <span className="inline-flex w-4 h-4 rounded-full overflow-hidden bg-white/10 shrink-0">
+                {m.icon 
+                  ? <img src={m.icon} alt="" className="w-full h-full object-cover" /> 
+                  : <span className="text-[8px] flex items-center justify-center w-full h-full">🌍</span>
+                }
               </span>
-              <span className="text-[#00C566] ml-2 text-[10px] break-keep">~+1.4%</span>
-            </span>
-          )
-        })}
-      </div>
-      
-      {/* Duplicate for seamless infinite scrolling */}
-      <div className="animate-marquee2 flex gap-12 group-hover:[animation-play-state:paused] whitespace-nowrap px-6 absolute top-1">
-        {markets.map((m, i) => {
-          const yesAssetId = m.tokens?.[0]?.token_id;
-          let currentPrice = parseFloat(m.outcomePrices?.[0] || "0.5");
-          if (yesAssetId && livePrices[yesAssetId] !== undefined) {
-              currentPrice = livePrices[yesAssetId];
-          }
+              
+              {/* Market title (truncated) */}
+              <span className="text-[#7A7068] max-w-[180px] truncate">{m.question}</span>
+              
+              {/* Price */}
+              <span className="font-bold font-mono text-white">{pct}¢</span>
+              
+              {/* Direction */}
+              <span className={`text-[10px] font-bold ${isUp ? 'text-[#00D26A]' : 'text-[#FF4560]'}`}>
+                {isUp ? '▲' : '▼'} {Math.abs((pct - 50) * 0.1).toFixed(1)}%
+              </span>
 
-          return (
-            <span key={`mq2-${i}`} className="text-white text-xs font-mono font-medium flex items-center gap-2">
-              <span className="text-[#A69C8A] max-w-[200px] truncate block">{m.question.substring(0, 40)}...</span>
-              <span className="text-[#00C566]">
-                {Math.round(currentPrice * 100)}¢
-              </span>
-              <span className="text-[#00C566] ml-2 text-[10px]">~+1.4%</span>
+              {/* Separator */}
+              <span className="text-white/10 text-base font-light ml-2">|</span>
             </span>
-          )
+          );
         })}
       </div>
-{/* Tailwind config requires defining these keyframes in global CSS or inline if complex, but simple CSS animation applies here */}
-<style dangerouslySetInnerHTML={{__html: `
-.animate-marquee { animation: marquee 35s linear infinite; }
-.animate-marquee2 { animation: marquee2 35s linear infinite; }
-@keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-100%); } }
-@keyframes marquee2 { 0% { transform: translateX(100%); } 100% { transform: translateX(0%); } }
-`}} />
     </div>
   );
 }

@@ -13,16 +13,12 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
     const { setSubscribeTokens } = useMarketStore();
     const [selectedCategory, setSelectedCategory] = useState<string>("All");
     
-    // Detail Modal State
     const [isDetailModalOpen, setDetailModalOpen] = useState(false);
-
-    // Bet Modal State
     const [isBetModalOpen, setBetModalOpen] = useState(false);
     const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
     const [selectedOutcome, setSelectedOutcome] = useState<"YES"|"NO"|null>(null);
     const [selectedPrice, setSelectedPrice] = useState<number>(0);
 
-    // Init WebSocket connection
     usePolymarketWSS();
 
     useEffect(() => {
@@ -34,20 +30,17 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
                 });
             }
         });
-
-        if (tokensToWatch.length > 0) {
-            setSubscribeTokens(tokensToWatch);
-        }
+        if (tokensToWatch.length > 0) setSubscribeTokens(tokensToWatch);
     }, [initialMarkets, setSubscribeTokens]);
 
     const categories = [
-        { name: "All", icon: <Flame size={16} className={selectedCategory === "All" ? "text-orange-500" : ""} /> },
-        { name: "Global", icon: <Globe size={16} /> },
-        { name: "Crypto", icon: <Bitcoin size={16} /> },
-        { name: "Politics", icon: <Landmark size={16} /> },
-        { name: "Sports", icon: <Trophy size={16} /> },
-        { name: "Economy", icon: <TrendingUp size={16} /> },
-        { name: "Entertainment", icon: <Clapperboard size={16} /> }
+        { name: "All", icon: <Flame size={13} /> },
+        { name: "Global", icon: <Globe size={13} /> },
+        { name: "Crypto", icon: <Bitcoin size={13} /> },
+        { name: "Politics", icon: <Landmark size={13} /> },
+        { name: "Sports", icon: <Trophy size={13} /> },
+        { name: "Economy", icon: <TrendingUp size={13} /> },
+        { name: "Entertainment", icon: <Clapperboard size={13} /> }
     ];
 
     const filteredMarkets = selectedCategory === "All" 
@@ -60,7 +53,7 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
     };
 
     const handleBetClick = (e: React.MouseEvent, market: Market, outcome: "YES"|"NO", price: number) => {
-        e.stopPropagation(); // Prevents the card click from opening the detail modal
+        e.stopPropagation();
         setSelectedMarket(market);
         setSelectedOutcome(outcome);
         setSelectedPrice(price);
@@ -68,27 +61,41 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
     };
 
     return (
-        <div className="w-full flex flex-col pt-0">
+        <div className="w-full flex flex-col">
             
-            {/* Forecast Markets Style Category Pill Filter */}
-            <div className="flex overflow-x-auto gap-3 hide-scrollbar mb-8 pb-2">
+            {/* Section header */}
+            <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                    <h2 className="text-[15px] font-bold text-white">Live Markets</h2>
+                    <span className="text-[11px] text-[#7A7068] bg-white/[0.04] border border-white/[0.07] px-2 py-0.5 rounded-full font-mono">
+                        {filteredMarkets.length} markets
+                    </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-[#00D26A]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00D26A] animate-pulse inline-block" />
+                    Live
+                </div>
+            </div>
+            
+            {/* Category Filter Pills */}
+            <div className="flex overflow-x-auto gap-2 hide-scrollbar mb-6 pb-1">
                 {categories.map((cat) => (
                     <button
                         key={cat.name}
                         onClick={() => setSelectedCategory(cat.name)}
-                        className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-1.5 rounded-full font-sans text-[13px] font-medium transition-all shadow-sm cursor-pointer ${
+                        className={`whitespace-nowrap flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all cursor-pointer ${
                             selectedCategory === cat.name 
-                            ? 'bg-[#110F0D] text-white border border-[#3D2E1E] shadow-[0_4px_12px_rgba(0,0,0,0.5)]' 
-                            : 'bg-[#1A1511] text-[#A69C8A] border border-[#3D2E1E]/50 hover:bg-[#110F0D] hover:text-white'
+                            ? 'bg-white/[0.1] text-white border border-white/[0.15]' 
+                            : 'bg-transparent text-[#7A7068] border border-white/[0.06] hover:text-white hover:border-white/[0.12]'
                         }`}
                     >
-                        <span>{cat.icon}</span> {cat.name}
+                        {cat.icon} {cat.name}
                     </button>
                 ))}
             </div>
 
-            {/* Forecast Markets Grid (Responsive: 1 -> 2 -> 3 -> 4) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {/* Markets Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredMarkets.length > 0 ? filteredMarkets.map((market, i) => (
                     <MarketCard 
                         key={market.condition_id || i} 
@@ -98,7 +105,7 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
                         onBetClick={handleBetClick}
                     />
                 )) : (
-                    <div className="col-span-full pt-10 text-center text-slate-500 font-mono">
+                    <div className="col-span-full py-16 text-center text-[#7A7068] text-sm font-mono">
                         No markets found in this category.
                     </div>
                 )}
