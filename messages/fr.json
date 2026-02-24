@@ -1,0 +1,24 @@
+{
+  "Home": {
+    "title": "Bienvenue sur SabiMarkets",
+    "description": "Le Premier Marché de Prédiction en Afrique",
+    "connect_wallet": "Connecter le Portefeuille",
+    "markets": "Marchés",
+    "portfolio": "Portefeuille",
+    "bet_now": "Parier Maintenant",
+    "yes": "Oui",
+    "no": "Non",
+    "search_placeholder": "Rechercher des marchés, événements...",
+    "live": "En Direct",
+    "trending": "Tendances",
+    "volume": "Volume",
+    "settings": "Paramètres",
+    "disconnect": "Déconnecter",
+    "copy_address": "Copier l'Adresse",
+    "view_on_polygon": "Voir sur Polygon"
+  },
+  "Market": {
+    "live_odds": "Cotes en Direct",
+    "volume": "Volume"
+  }
+}

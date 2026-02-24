@@ -1,0 +1,24 @@
+{
+  "Home": {
+    "title": "Bem-vindo ao SabiMarkets",
+    "description": "O Primeiro Mercado de Previsão de África",
+    "connect_wallet": "Conectar Carteira",
+    "markets": "Mercados",
+    "portfolio": "Portfólio",
+    "bet_now": "Apostar Agora",
+    "yes": "Sim",
+    "no": "Não",
+    "search_placeholder": "Pesquisar mercados, eventos...",
+    "live": "Ao Vivo",
+    "trending": "Em Alta",
+    "volume": "Volume",
+    "settings": "Configurações",
+    "disconnect": "Desconectar",
+    "copy_address": "Copiar Endereço",
+    "view_on_polygon": "Ver no Polygon"
+  },
+  "Market": {
+    "live_odds": "Odds ao Vivo",
+    "volume": "Volume"
+  }
+}

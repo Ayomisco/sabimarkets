@@ -1,0 +1,24 @@
+{
+  "Home": {
+    "title": "Barka da zuwa SabiMarkets",
+    "description": "Kasuwar Hasashe ta Farko a Afirka",
+    "connect_wallet": "Haɗa Walat",
+    "markets": "Kasuwannin",
+    "portfolio": "Portfolio",
+    "bet_now": "Yin Caca",
+    "yes": "Ee",
+    "no": "A'a",
+    "search_placeholder": "Nema kasuwannin, abubuwa...",
+    "live": "Layi",
+    "trending": "Sanannen",
+    "volume": "Maikari",
+    "settings": "Saituna",
+    "disconnect": "Yanke Haɗi",
+    "copy_address": "Kwafi Adireshi",
+    "view_on_polygon": "Duba a Polygon"
+  },
+  "Market": {
+    "live_odds": "Damar Layi",
+    "volume": "Maikari"
+  }
+}

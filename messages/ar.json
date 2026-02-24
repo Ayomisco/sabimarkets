@@ -1,0 +1,24 @@
+{
+  "Home": {
+    "title": "مرحباً بك في SabiMarkets",
+    "description": "أول سوق تنبؤات في أفريقيا",
+    "connect_wallet": "ربط المحفظة",
+    "markets": "الأسواق",
+    "portfolio": "المحفظة",
+    "bet_now": "راهن الآن",
+    "yes": "نعم",
+    "no": "لا",
+    "search_placeholder": "ابحث عن الأسواق والأحداث...",
+    "live": "مباشر",
+    "trending": "الأكثر تداولاً",
+    "volume": "الحجم",
+    "settings": "الإعدادات",
+    "disconnect": "قطع الاتصال",
+    "copy_address": "نسخ العنوان",
+    "view_on_polygon": "عرض في Polygon"
+  },
+  "Market": {
+    "live_odds": "احتمالات مباشرة",
+    "volume": "الحجم"
+  }
+}

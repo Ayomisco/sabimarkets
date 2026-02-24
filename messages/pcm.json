@@ -1,16 +1,24 @@
 {
   "Home": {
     "title": "Welcome to SabiMarkets",
-    "description": "Africa's First Native Prediction Market",
+    "description": "Africa First Prediction Market wey dey local",
     "connect_wallet": "Connect Wallet",
     "markets": "Markets",
-    "portfolio": "My Money",
-    "bet_now": "Make Bet",
+    "portfolio": "Portfolio",
+    "bet_now": "Bet Now",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "search_placeholder": "Search markets, events, teams...",
+    "live": "Live",
+    "trending": "Trending Now",
+    "volume": "Volume",
+    "settings": "Settings",
+    "disconnect": "Disconnect",
+    "copy_address": "Copy Address",
+    "view_on_polygon": "View for Polygon"
   },
   "Market": {
     "live_odds": "Live Odds",
-    "volume": "Total Money"
+    "volume": "Volume"
   }
 }

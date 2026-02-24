@@ -1,0 +1,24 @@
+{
+  "Home": {
+    "title": "Siyakwamukela ku-SabiMarkets",
+    "description": "Imakethe Yokubikezela YaseAfrika",
+    "connect_wallet": "Xhuma Isikhwama",
+    "markets": "Izimakethe",
+    "portfolio": "Ifoliya",
+    "bet_now": "Bhetha Manje",
+    "yes": "Yebo",
+    "no": "Cha",
+    "search_placeholder": "Sesha izimakethe, izenzakalo...",
+    "live": "Bukhoma",
+    "trending": "Iyahamba",
+    "volume": "Ivolumu",
+    "settings": "Izilungiselelo",
+    "disconnect": "Nqamula",
+    "copy_address": "Kopisha Ikheli",
+    "view_on_polygon": "Buka ku-Polygon"
+  },
+  "Market": {
+    "live_odds": "Amathuba Abukhoma",
+    "volume": "Ivolumu"
+  }
+}

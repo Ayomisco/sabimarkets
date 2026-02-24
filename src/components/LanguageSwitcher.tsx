@@ -1,27 +1,93 @@
 "use client";
 
+import { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
+import { ChevronDown, Globe } from 'lucide-react';
+
+const LANGUAGES = [
+  { code: 'en',  label: 'English',         flag: '🇬🇧', region: 'Global' },
+  { code: 'fr',  label: 'Français',        flag: '🇫🇷', region: 'Francophone Africa' },
+  { code: 'ar',  label: 'العربية',         flag: '🇪🇬', region: 'North Africa' },
+  { code: 'pt',  label: 'Português',       flag: '🇦🇴', region: 'Lusophone Africa' },
+  { code: 'sw',  label: 'Kiswahili',       flag: '🇰🇪', region: 'East Africa' },
+  { code: 'am',  label: 'አማርኛ',           flag: '🇪🇹', region: 'Ethiopia' },
+  { code: 'so',  label: 'Soomaali',        flag: '🇸🇴', region: 'Somalia' },
+  { code: 'ha',  label: 'Hausa',           flag: '🇳🇬', region: 'West Africa' },
+  { code: 'yo',  label: 'Yorùbá',          flag: '🇳🇬', region: 'Nigeria / Benin' },
+  { code: 'ig',  label: 'Igbo',            flag: '🇳🇬', region: 'Nigeria' },
+  { code: 'pcm', label: 'Naija Pidgin',    flag: '🇳🇬', region: 'Nigeria' },
+  { code: 'tw',  label: 'Twi',             flag: '🇬🇭', region: 'Ghana' },
+  { code: 'zu',  label: 'isiZulu',         flag: '🇿🇦', region: 'South Africa' },
+  { code: 'xh',  label: 'isiXhosa',        flag: '🇿🇦', region: 'South Africa' },
+  { code: 'rw',  label: 'Kinyarwanda',     flag: '🇷🇼', region: 'Rwanda' },
+  { code: 'lg',  label: 'Luganda',         flag: '🇺🇬', region: 'Uganda' },
+];
 
 export function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
-  const handleSwitch = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    router.replace(pathname, { locale: e.target.value as any });
+  const currentLang = LANGUAGES.find(l => l.code === locale) || LANGUAGES[0];
+
+  const handleSelect = (code: string) => {
+    router.replace(pathname, { locale: code as any });
+    setIsOpen(false);
   };
 
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div className="relative inline-block text-left font-mono">
-      <select 
-        value={locale} 
-        onChange={handleSwitch}
-        className="bg-black/50 border border-[#d2a373]/30 text-[#d2a373] text-sm rounded-lg focus:ring-[#00C566] focus:border-[#00C566] block w-full p-2 appearance-none outline-none hover:bg-black/80 transition-all cursor-pointer shadow-[0_0_10px_rgba(210,163,115,0.1)] focus:shadow-[0_0_10px_rgba(0,197,102,0.4)]"
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-lg text-[13px] text-[#ccc] hover:text-white transition-all"
       >
-        <option value="en">🇬🇧 English</option>
-        <option value="pcm">🇳🇬 Pidgin</option>
-      </select>
+        <Globe size={13} className="text-[#7A7068]" />
+        <span className="hidden sm:inline text-[#7A7068]">{currentLang.flag}</span>
+        <span className="hidden sm:inline font-medium">{currentLang.label}</span>
+        <ChevronDown size={12} className={`text-[#7A7068] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 w-64 bg-[#0F0D0B] border border-white/[0.09] rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-up">
+          <div className="px-3 py-2 border-b border-white/[0.06]">
+            <p className="text-[10px] font-semibold text-[#7A7068] uppercase tracking-widest">Language / Uzungumzaji</p>
+          </div>
+          <div className="max-h-[320px] overflow-y-auto">
+            {LANGUAGES.map(lang => (
+              <button
+                key={lang.code}
+                onClick={() => handleSelect(lang.code)}
+                className={`cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-[13px] transition-colors hover:bg-white/[0.05] ${
+                  locale === lang.code ? 'bg-[#00D26A]/10 text-[#00D26A]' : 'text-[#ccc]'
+                }`}
+              >
+                <span className="text-base w-6 text-center">{lang.flag}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold truncate">{lang.label}</p>
+                  <p className="text-[10px] text-[#7A7068] truncate">{lang.region}</p>
+                </div>
+                {locale === lang.code && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00D26A] shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

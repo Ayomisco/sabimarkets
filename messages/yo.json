@@ -1,0 +1,24 @@
+{
+  "Home": {
+    "title": "Kaabọ sí SabiMarkets",
+    "description": "Àkọ́kọ́ Oja Asọtẹlẹ Afirika",
+    "connect_wallet": "So Apamọ Wọle",
+    "markets": "Awọn Ojà",
+    "portfolio": "Àpamọ Mi",
+    "bet_now": "Darí Bẹt",
+    "yes": "Bẹẹni",
+    "no": "Rárá",
+    "search_placeholder": "Wa awọn oja, iṣẹlẹ...",
+    "live": "Laaye",
+    "trending": "Tó Gbayín",
+    "volume": "Iwọn",
+    "settings": "Eto",
+    "disconnect": "Yọ Kuro",
+    "copy_address": "Daakọ Adirẹsi",
+    "view_on_polygon": "Wo lori Polygon"
+  },
+  "Market": {
+    "live_odds": "Awọn Ona Laaye",
+    "volume": "Iwọn"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "Home": {
+    "title": "Ku Soo Dhawoow SabiMarkets",
+    "description": "Suuqa Saadaalinta ee Koowaad ee Afrika",
+    "connect_wallet": "Xidh Jeelka",
+    "markets": "Suuqyada",
+    "portfolio": "Khasnada",
+    "bet_now": "Rahanso Hada",
+    "yes": "Haa",
+    "no": "Maya",
+    "search_placeholder": "Raadi suuqyada, dhacdooyinka...",
+    "live": "Toos",
+    "trending": "Caanka",
+    "volume": "Xajmiga",
+    "settings": "Goobaha",
+    "disconnect": "Kala Gooy",
+    "copy_address": "Nuqul Cinwaanka",
+    "view_on_polygon": "Arag Polygon"
+  },
+  "Market": {
+    "live_odds": "Fursadaha Tooska",
+    "volume": "Xajmiga"
+  }
+}

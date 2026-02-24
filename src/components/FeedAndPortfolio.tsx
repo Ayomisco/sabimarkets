@@ -30,7 +30,7 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 pb-24 relative z-10">
+    <div className="w-full">
       
       {/* ─── TOP NAV TABS ─── */}
       <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.07] p-1 rounded-xl w-max mb-8">

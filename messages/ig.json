@@ -1,0 +1,24 @@
+{
+  "Home": {
+    "title": "Nnọọ na SabiMarkets",
+    "description": "Ahia Ntọala Mbụ nke Africa",
+    "connect_wallet": "Jikọọ Akpa ego",
+    "markets": "Ahia",
+    "portfolio": "Portfolio",
+    "bet_now": "Itinye ego ugbu a",
+    "yes": "Ọ bụ",
+    "no": "Mba",
+    "search_placeholder": "Chọọ ahia, ihe omume...",
+    "live": "Ndụ",
+    "trending": "Ihe pụtara ìhè",
+    "volume": "Ọnụọgụ",
+    "settings": "Ntọala",
+    "disconnect": "Kewaa",
+    "copy_address": "Detuo adreesị",
+    "view_on_polygon": "Lee na Polygon"
+  },
+  "Market": {
+    "live_odds": "Ohere ndụ",
+    "volume": "Ọnụọgụ"
+  }
+}

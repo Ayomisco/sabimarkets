@@ -1,0 +1,24 @@
+{
+  "Home": {
+    "title": "Karibu SabiMarkets",
+    "description": "Soko la Kwanza la Ubashiri Afrika",
+    "connect_wallet": "Unganisha Pochi",
+    "markets": "Masoko",
+    "portfolio": "Kwingineko",
+    "bet_now": "Weka Dau",
+    "yes": "Ndiyo",
+    "no": "Hapana",
+    "search_placeholder": "Tafuta masoko, matukio...",
+    "live": "Moja kwa moja",
+    "trending": "Inayoendelea",
+    "volume": "Kiasi",
+    "settings": "Mipangilio",
+    "disconnect": "Tenganisha",
+    "copy_address": "Nakili Anwani",
+    "view_on_polygon": "Angalia kwenye Polygon"
+  },
+  "Market": {
+    "live_odds": "Uwezekano wa Moja kwa Moja",
+    "volume": "Kiasi"
+  }
+}

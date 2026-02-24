@@ -1,0 +1,24 @@
+{
+  "Home": {
+    "title": "ወደ SabiMarkets እንኳን ደህና መጡ",
+    "description": "የአፍሪካ የመጀመሪያ ትንበያ ገበያ",
+    "connect_wallet": "ዋሌት አገናኝ",
+    "markets": "ገበያዎች",
+    "portfolio": "ፖርትፎሊዮ",
+    "bet_now": "አሁን ይወሩ",
+    "yes": "አዎ",
+    "no": "አይ",
+    "search_placeholder": "ገበያዎችን ፣ ክስተቶችን ፈልግ...",
+    "live": "ቀጥታ",
+    "trending": "ቀጥታ ይዘት",
+    "volume": "መጠን",
+    "settings": "ቅንጅቶች",
+    "disconnect": "ለዩ",
+    "copy_address": "አድራሻ ቅዳ",
+    "view_on_polygon": "በ Polygon ላይ ይመልከቱ"
+  },
+  "Market": {
+    "live_odds": "ቀጥታ እድሎች",
+    "volume": "መጠን"
+  }
+}
