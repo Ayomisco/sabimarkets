@@ -30,7 +30,7 @@ https://sabimarkets.xyz (Purchasing soon)
 [@Your_Telegram_Handle]
 
 **Builder API key:**
-*(Leave blank or request one if relevant in the application)*
+`019a500c-f1a7-737d-88ad-788a12422964` (As defined in our `.env` via `NEXT_PUBLIC_POLY_BUILDER_KEY`)
 
 ---
 
