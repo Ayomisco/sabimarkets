@@ -21,6 +21,13 @@ The current SabiMarkets MVP operates as a High-Fidelity Simulation (Demo Mode). 
 
 We have successfully built the localized UI, the African indexing engine, and validated product-market fit. We are applying for the Builder Grant specifically to fund the necessary Web3 engineering to complete the CTF Proxy Wallet integration and take SabiMarkets to production.
 
+---
+
+**Project Description (Alternative Short Version):**
+SabiMarkets is a localized frontend for Polymarket specifically tailored to the African demographic. We filter and surface markets relating to all 54 African countries—focusing on local politics, sports, and economies—providing a frictionless "dark mode" terminal for emerging market users. 
+
+Our current MVP fully implements the UI and live Polymarket CLOB/Gamma indexing using our African filtering algorithm. We are applying for the Builder Grant to fund the Web3 engineering required to build out the CTF Proxy Wallet execution layer (via `@polymarket/clob-client`) so we can seamlessly route real African liquidity into Polymarket's smart contracts.
+
 **Website URL:**
 https://sabimarkets.xyz (Purchasing soon)
 *(Temporary Production URL: https://sabimarkets-YOUR_VERCEL_ID.vercel.app)*
