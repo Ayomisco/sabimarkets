@@ -6,7 +6,7 @@ import { useMarketStore } from "@/store/marketStore";
 import { TrendingUp } from "lucide-react";
 
 interface MarketCardProps {
-  market: Market;
+  market: Market & { uiCategory?: string };
   index: number;
   onMarketClick: (market: Market) => void;
   onBetClick: (e: React.MouseEvent, market: Market, outcome: "YES" | "NO", price: number) => void;
