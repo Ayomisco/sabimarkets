@@ -5,6 +5,7 @@ import { Market } from '@/lib/polymarket/types';
 import MarketChart from './MarketChart';
 import { MarketList } from './MarketList';
 import { BetModal } from './BetModal';
+import { MarketDetailModal } from './MarketDetailModal';
 import { usePortfolioStore } from '@/store/portfolioStore';
 import { useAccount } from 'wagmi';
 import { Activity, Clock, TrendingUp, DollarSign, BarChart2, Award, Wallet } from 'lucide-react';
@@ -23,7 +24,8 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
 
   const [isHeroBetOpen, setHeroBetOpen] = useState(false);
   const [heroOutcome, setHeroOutcome] = useState<"YES"|"NO"|null>(null);
-  
+  const [isHeroDetailOpen, setHeroDetailOpen] = useState(false);
+
   const handleHeroBet = (outcome: "YES"|"NO") => {
     setHeroOutcome(outcome);
     setHeroBetOpen(true);
@@ -233,7 +235,10 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
                     >
                       Bet NO · {100 - Math.round(heroYesPrice * 100)}¢
                     </button>
-                    <button className="cursor-pointer hidden sm:flex items-center gap-1.5 text-[#7A7068] hover:text-white text-sm font-medium transition-colors px-3">
+                    <button
+                      onClick={() => setHeroDetailOpen(true)}
+                      className="cursor-pointer flex items-center gap-1.5 text-[#7A7068] hover:text-white text-sm font-medium transition-colors px-3 py-3 rounded-xl border border-white/[0.07] hover:bg-white/[0.05]"
+                    >
                       View Details ↗
                     </button>
                   </div>
@@ -267,12 +272,17 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
         </div>
       )}
 
-      <BetModal 
-        isOpen={isHeroBetOpen} 
-        onClose={() => setHeroBetOpen(false)} 
+      <BetModal
+        isOpen={isHeroBetOpen}
+        onClose={() => setHeroBetOpen(false)}
         market={heroMarket}
         selectedOutcome={heroOutcome}
         currentPrice={heroOutcome === 'YES' ? heroYesPrice : (1 - heroYesPrice)}
+      />
+      <MarketDetailModal
+        isOpen={isHeroDetailOpen}
+        onClose={() => setHeroDetailOpen(false)}
+        market={heroMarket}
       />
     </div>
   );
