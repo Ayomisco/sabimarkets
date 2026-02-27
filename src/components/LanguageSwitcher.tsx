@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { usePathname, useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
-import { ChevronDown, Globe } from 'lucide-react';
+import { ChevronDown, Globe, Loader2 } from 'lucide-react';
 
 const LANGUAGES = [
   { code: 'en',  label: 'English',         flag: '🇬🇧', region: 'Global' },
@@ -24,26 +23,34 @@ const LANGUAGES = [
   { code: 'lg',  label: 'Luganda',         flag: '🇺🇬', region: 'Uganda' },
 ];
 
+const KNOWN_LOCALES = LANGUAGES.map(l => l.code);
+
 export function LanguageSwitcher() {
   const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const currentLang = LANGUAGES.find(l => l.code === locale) || LANGUAGES[0];
 
   const handleSelect = (code: string) => {
-    router.replace(pathname, { locale: code as any });
+    if (code === locale) { setIsOpen(false); return; }
+    setLoading(true);
     setIsOpen(false);
+    // HARD full-page navigation so the Next.js server re-renders the page
+    // and runs translateMarkets() with the new locale.
+    // Client-side router.replace() only re-uses hydrated client state which
+    // keeps stale English market text.
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    const newPath = KNOWN_LOCALES.includes(segments[0])
+      ? '/' + code + (segments.length > 1 ? '/' + segments.slice(1).join('/') : '')
+      : '/' + code + window.location.pathname;
+    window.location.href = newPath + window.location.search;
   };
 
-  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -53,11 +60,15 @@ export function LanguageSwitcher() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-lg text-[13px] text-[#ccc] hover:text-white transition-all"
+        disabled={loading}
+        className="cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-lg text-[13px] text-[#ccc] hover:text-white transition-all disabled:opacity-60"
       >
-        <Globe size={13} className="text-[#7A7068]" />
+        {loading
+          ? <Loader2 size={13} className="animate-spin text-[#00D26A]" />
+          : <Globe size={13} className="text-[#7A7068]" />
+        }
         <span className="hidden sm:inline text-[#7A7068]">{currentLang.flag}</span>
-        <span className="hidden sm:inline font-medium">{currentLang.label}</span>
+        <span className="hidden sm:inline font-medium">{loading ? 'Loading...' : currentLang.label}</span>
         <ChevronDown size={12} className={`text-[#7A7068] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
