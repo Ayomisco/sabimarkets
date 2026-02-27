@@ -8,7 +8,7 @@ import { BetModal } from './BetModal';
 import { MarketDetailModal } from './MarketDetailModal';
 import { usePortfolioStore } from '@/store/portfolioStore';
 import { useAccount } from 'wagmi';
-import { Activity, Clock, TrendingUp, DollarSign, BarChart2, Award, Wallet } from 'lucide-react';
+import { Activity, Clock, TrendingUp, DollarSign, BarChart2, Award, Wallet, Globe } from 'lucide-react';
 
 interface Props {
   heroMarket: Market | null;
@@ -265,8 +265,17 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
           {feedMarkets && feedMarkets.length > 0 ? (
             <MarketList initialMarkets={feedMarkets} />
           ) : (
-            <div className="text-center py-20 text-[#7A7068] font-mono text-sm">
-              Scanning for African markets...
+            <div className="text-center py-24 flex flex-col items-center justify-center border border-white/[0.05] rounded-2xl bg-white/[0.01]">
+              <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-5">
+                <Globe size={28} className="text-[#7A7068]" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">No Markets Available</h3>
+              <p className="text-[#7A7068] text-sm max-w-xs mb-6 leading-relaxed">
+                We're currently unable to load active markets from the Polymarket Oracle. Please check back later.
+              </p>
+              <button onClick={() => window.location.reload()} className="cursor-pointer bg-white/[0.08] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/[0.12] transition-colors border border-white/[0.1]">
+                Refresh Page
+              </button>
             </div>
           )}
         </div>

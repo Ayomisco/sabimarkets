@@ -7,7 +7,7 @@ import {
   Copy, ExternalLink, Settings, LogOut, ChevronDown, 
   CheckCircle, Wallet, User, TrendingUp
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 
 function shortenAddress(addr: string) {
   return addr.slice(0, 6) + '···' + addr.slice(-4);

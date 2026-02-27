@@ -4,7 +4,7 @@ import { fetchAfricanMarkets } from '@/lib/polymarket/api';
 import { translateMarkets } from '@/lib/translate';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { WalletMenu } from '@/components/WalletMenu';
-import { Search, Bell } from 'lucide-react';
+import { Search } from 'lucide-react';
 import Marquee from '@/components/Marquee';
 import { FeedAndPortfolio } from '@/components/FeedAndPortfolio';
 
@@ -70,14 +70,22 @@ export default async function HomePage() {
           {/* Right controls */}
           <div className="flex items-center gap-2 shrink-0">
             <LanguageSwitcher />
-            <button className="relative p-2 text-[#7A7068] hover:text-white transition-colors rounded-lg hover:bg-white/[0.05] hidden sm:flex items-center justify-center">
-              <Bell size={16} />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#FF4560] rounded-full animate-pulse" />
-            </button>
             <WalletMenu />
           </div>
         </div>
       </header>
+
+      {/* ─── MOBILE SEARCH ─── */}
+      <div className="md:hidden w-full px-4 py-3 border-b border-white/[0.06] bg-[#080706]/80 backdrop-blur-xl">
+        <div className="relative w-full">
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A7068] pointer-events-none" />
+          <input
+            type="text"
+            placeholder={t('search_placeholder')}
+            className="w-full bg-white/[0.04] border border-white/[0.08] text-white text-[13px] rounded-full pl-8 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#00D26A]/40 focus:border-[#00D26A]/30 transition-all placeholder:text-[#7A7068]"
+          />
+        </div>
+      </div>
 
       {/* ─── LIVE TICKER ─── */}
       <div className="w-full border-b border-white/[0.05] bg-[#080706]/60 overflow-hidden py-2">
