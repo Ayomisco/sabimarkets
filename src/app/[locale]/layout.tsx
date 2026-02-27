@@ -3,16 +3,49 @@ import {NextIntlClientProvider} from 'next-intl';
 import {getMessages} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import {routing} from '@/i18n/routing';
-import '../globals.css'; // Make sure styling is imported
+import '../globals.css';
 
 import { Providers } from '@/components/Providers';
 
 export const metadata: Metadata = {
+  title: {
+    default: 'SabiMarket — Africa\'s Native Prediction Market',
+    template: '%s | SabiMarket',
+  },
+  description: 'SabiMarket is Africa\'s first decentralised prediction market. Bet on real-world events across politics, sports, economy, and more — powered by Polymarket and built for Africa.',
+  keywords: ['prediction market', 'africa', 'polymarket', 'crypto', 'betting', 'nigeria', 'kenya', 'ghana', 'defi', 'web3', 'sabimarket'],
+  authors: [{ name: 'SabiMarket', url: 'https://sabimarket.xyz' }],
+  creator: 'SabiMarket',
+  metadataBase: new URL('https://sabimarket.xyz'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://sabimarket.xyz',
+    siteName: 'SabiMarket',
+    title: 'SabiMarket — Africa\'s Native Prediction Market',
+    description: 'Africa\'s first decentralised prediction market. Bet on real-world events — powered by Polymarket.',
+    images: [
+      {
+        url: '/logo.svg',
+        width: 500,
+        height: 120,
+        alt: 'SabiMarket Logo',
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SabiMarket — Africa\'s Native Prediction Market',
+    description: 'Africa\'s first decentralised prediction market. Bet on real-world events.',
+    images: ['/logo.svg'],
+    creator: '@sabimarket',
+  },
   icons: {
     icon: '/logo-icon.svg',
     shortcut: '/logo-icon.svg',
     apple: '/logo-icon.svg',
   },
+  manifest: '/site.webmanifest',
 };
 
 export default async function LocaleLayout({
@@ -23,7 +56,7 @@ export default async function LocaleLayout({
   params: Promise<{locale: string}>;
 }) {
   const {locale} = await params;
-  
+
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }

@@ -1,0 +1,17 @@
+{
+  "name": "SabiMarket",
+  "short_name": "SabiMarket",
+  "description": "Africa's Native Prediction Market",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080706",
+  "theme_color": "#00D26A",
+  "icons": [
+    {
+      "src": "/logo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

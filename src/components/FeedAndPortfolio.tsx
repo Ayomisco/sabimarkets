@@ -113,7 +113,7 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
                 <Wallet size={28} className="text-[#7A7068]" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Connect Your Wallet</h3>
-              <p className="text-[#7A7068] text-sm max-w-xs mb-6 leading-relaxed">Connect your wallet to view your active SabiMarkets positions and portfolio overview.</p>
+              <p className="text-[#7A7068] text-sm max-w-xs mb-6 leading-relaxed">Connect your wallet to view your active SabiMarket positions and portfolio overview.</p>
             </div>
           ) : portfolioSubTab === 'history' ? (
             <div className="w-full bg-[#0F0D0B] border border-white/[0.07] rounded-2xl p-16 text-center flex flex-col items-center justify-center">

@@ -47,7 +47,7 @@ export default async function HomePage() {
 
           {/* Logo */}
           <a href="/" className="flex items-center gap-2 shrink-0">
-            <img src="/logo-icon.svg" alt="SabiMarkets" className="w-8 h-8 shrink-0" />
+            <img src="/logo-icon.svg" alt="SabiMarket" className="w-8 h-8 shrink-0" />
             <span className="text-[15px] font-bold text-white tracking-tight hidden sm:inline">
               Sabi<span className="text-[#00D26A]">Markets</span>
             </span>

@@ -7,7 +7,7 @@ import { polygon } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 const config = getDefaultConfig({
-    appName: 'SabiMarkets',
+    appName: 'SabiMarket',
     projectId: '3c829e0cc0f5eb02fbee29d3c50965d1', // generic placeholder projectId
     chains: [polygon],
     ssr: true,

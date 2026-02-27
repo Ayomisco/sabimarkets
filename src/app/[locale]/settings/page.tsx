@@ -77,7 +77,7 @@ export default function SettingsPage() {
         <div className="max-w-[1200px] mx-auto flex items-center justify-between px-4 sm:px-6 h-14">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
-              <img src="/logo-icon.svg" alt="SabiMarkets" className="w-8 h-8 shrink-0" />
+              <img src="/logo-icon.svg" alt="SabiMarket" className="w-8 h-8 shrink-0" />
               <span className="text-[15px] font-bold text-white tracking-tight">
                 Sabi<span className="text-[#00D26A]">Markets</span>
               </span>
@@ -118,7 +118,7 @@ export default function SettingsPage() {
           
           {/* ── PROFILE ── */}
           {activeSection === 'profile' && (
-            <Section title="Profile" description="Your wallet identity on SabiMarkets">
+            <Section title="Profile" description="Your wallet identity on SabiMarket">
               {isConnected && address ? (
                 <>
                   <div className="flex items-center gap-4 p-4 bg-white/[0.03] rounded-xl border border-white/[0.06] mb-6">
@@ -156,7 +156,7 @@ export default function SettingsPage() {
 
           {/* ── DISPLAY ── */}
           {activeSection === 'display' && (
-            <Section title="Display" description="Customize how SabiMarkets looks">
+            <Section title="Display" description="Customize how SabiMarket looks">
               <div className="mb-6">
                 <p className="text-[12px] text-[#7A7068] uppercase tracking-wider font-semibold mb-3">Theme</p>
                 <div className="grid grid-cols-3 gap-3">
@@ -314,7 +314,7 @@ export default function SettingsPage() {
               <div className="mt-4 p-4 bg-white/[0.02] border border-white/[0.06] rounded-xl">
                 <p className="text-[12px] font-semibold text-white mb-1">Non-Custodial by Design</p>
                 <p className="text-[12px] text-[#7A7068] leading-relaxed">
-                  SabiMarkets never holds your funds. All trades are signed by your own wallet and executed directly on Polymarket's smart contracts. Your keys = your money.
+                  SabiMarket never holds your funds. All trades are signed by your own wallet and executed directly on Polymarket's smart contracts. Your keys = your money.
                 </p>
               </div>
               {isConnected && address && (
@@ -329,7 +329,7 @@ export default function SettingsPage() {
 
           {/* ── DATA ── */}
           {activeSection === 'data' && (
-            <Section title="Data & Storage" description="Manage your local SabiMarkets data">
+            <Section title="Data & Storage" description="Manage your local SabiMarket data">
               <SettingsRow label="Clear Local Portfolio Cache" description="Remove locally saved bet positions (does not affect on-chain data)">
                 <button className="cursor-pointer text-[12px] text-[#FF4560] border border-[#FF4560]/30 bg-[#FF4560]/10 px-3 py-1.5 rounded-lg font-medium hover:bg-[#FF4560]/20 transition-colors flex items-center gap-1.5">
                   <Trash2 size={12} /> Clear
@@ -341,7 +341,7 @@ export default function SettingsPage() {
                 </button>
               </SettingsRow>
               <div className="mt-4 p-4 bg-white/[0.02] border border-white/[0.06] rounded-xl text-[12px] text-[#7A7068] leading-relaxed">
-                SabiMarkets stores your preferences and simulated portfolio in browser local storage only. No personal data is sent to any server.
+                SabiMarket stores your preferences and simulated portfolio in browser local storage only. No personal data is sent to any server.
               </div>
             </Section>
           )}

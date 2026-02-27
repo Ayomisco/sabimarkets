@@ -47,7 +47,7 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
-  /* SabiMarkets Design Tokens */
+  /* SabiMarket Design Tokens */
   --sabi-bg: #080706;
   --sabi-surface: #0f0d0b;
   --sabi-surface-2: #161310;
@@ -141,7 +141,7 @@
 }
 
 /* ========================
-   SabiMarkets Premium Animations
+   SabiMarket Premium Animations
 ========================= */
 
 @keyframes marquee {
