@@ -8,7 +8,7 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 const config = getDefaultConfig({
     appName: 'SabiMarket',
-    projectId: 'd579a8a79998b9febf26831effd00175',
+    projectId: 'd579a8a79998b9febf26831effd00175', // sabimarket.xyz WalletConnect cloud project
     chains: [polygon],
     ssr: true,
 });
