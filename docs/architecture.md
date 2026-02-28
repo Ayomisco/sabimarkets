@@ -1,71 +1,269 @@
-# SabiMarkets System Architecture & Web3 Integration
+# SabiMarket — Production Architecture & Roadmap
 
-## Overview
-SabiMarkets is a localized, high-performance interface built on top of the Polymarket infrastructure. It is designed specifically to capture the African market by bringing localized news, politics, sports, and economic forecasting into a highly responsive, "Dark Mode Native" financial terminal.
-
-As a Polymarket Builder partner, SabiMarkets leverages the decentralized liquidity and resolution mechanisms of Polymarket while providing a frictionless, tailored UX for African users.
+> Full technical blueprint for taking SabiMarket from a UI demo to a live, revenue-generating prediction market on Polygon.
 
 ---
 
-## Technical Stack
-- **Frontend Framework:** Next.js 16 (App Router) + React 18
-- **Styling:** Tailwind CSS + Radix UI + Framer Motion (for micro-animations)
-- **Data Visualization:** Recharts (rendering live CLOB tick data)
-- **State Management:** Zustand (for ephemeral UI state and local portfolio caching)
-- **Web3 Interaction:** `wagmi` / `viem` (for wallet connection and EIP-712 signature requests)
-- **Data APIs:** Polymarket Gamma API (REST) & Polymarket CLOB (WebSockets & REST)
+## 1. What's Live Right Now (Current State)
+
+| Layer | Status | Notes |
+|---|---|---|
+| Frontend (Next.js) | ✅ Deployed | sabimarket.xyz on Vercel |
+| 16 African Languages | ✅ Live | Auto-translated via Google Translate |
+| Market Feed | ✅ Live | Reads Polymarket Gamma API (read-only) |
+| Wallet Connect (Mobile) | ✅ Live | WalletConnect project ID wired |
+| Portfolio | ⚠️ Simulated | Stored in browser localStorage only |
+| Real Trading | ❌ Not wired | Needs proxy wallet + CLOB integration |
+| Smart Contracts | ❌ None deployed | Polymarket's contracts used directly |
+| Revenue / Fees | ❌ Not collected | Builder fee wallet set, needs CLOB wiring |
 
 ---
 
-## 🏗️ Architecture & Component Flow
+## 2. What Smart Contracts Do We Actually Need?
 
-### 1. Market Indexing & Filtering (Gamma API)
-SabiMarkets dynamically indexes active markets from the Polymarket Gamma API. To fulfill its core value proposition, the indexing engine applies a strict localized filter:
-- Prioritizes markets containing keywords for all 54 African countries, leaders, major cities, and local currencies.
-- Aggressively filters out non-global, hyper-specific U.S. markets (e.g., local state politics, IRS revenue metrics) to maintain a curated, globally relevant feed.
+**Good news:** Polymarket has already deployed all the core contracts on Polygon. You do NOT need to write a trading exchange.
 
-### 2. Deep Liquidity & Real-Time Sync (CLOB)
-- SabiMarkets connects to the **Polymarket Central Limit Order Book (CLOB)** via WebSockets.
-- Real-time tick updates drive changes perfectly synchronized with Polymarket across the App’s Marquee ticker, Market Cards, and interactive Recharts graphs.
+### 2A. Contracts SabiMarket Must Deploy
 
-### 3. Execution Layer (Web3 & Smart Contracts)
+| Contract | Purpose | Complexity |
+|---|---|---|
+| **SabiProxy Factory** | Deploys a personal proxy wallet for each user on first trade | Medium |
+| **Fee Distributor** (optional) | Splits builder fees between team & referrers | Low |
 
-#### Current State (MVP Demo Mode)
-Currently, SabiMarkets is operating as a **High-Fidelity Simulation (Demo Mode)**. This means it connects to live Polymarket WebSocket feeds for real-time tick data, allows users to connect their real Web3 wallets, and generates real EIP-712 cryptographic signature pop-ups. However, when the user clicks "Sign", the order is tracked in local state (`Zustand` persist) rather than broadcasted to Polymarket's order book. This is specifically designed for safe, zero-cost user testing, MVP pitching, and Builder applications.
+### 2B. Polymarket Contracts Already On Polygon (Use Directly)
 
-#### Production State (Real Trading Integration Roadmap)
-To route real money to Polymarket in production, the architecture requires:
-- **Proxy Wallets (CTF Exchange):** Users cannot trade directly from their EOA (Externally Owned Account like MetaMask) on Polymarket. Upon their first trade, SabiMarkets must use the `@polymarket/clob-client` SDK to automatically deploy a smart contract Proxy Wallet for the user.
-- **USDC Allowances:** The user must sign a transaction granting infinite allowance to the Polymarket Exchange contract to spend USDC from their proxy wallet.
-- **CLOB Order Routing:** SabiMarkets must craft the order payload, request an EIP-712 signature from the user, and POST the signed message to Polymarket's Central Limit Order Book (`/order` endpoint) bypassing the gas-heavy on-chain execution for the matching engine.
-
-### 4. Portfolio Tracking
-- **MVP Validation:** The portfolio currently stores simulated trades in frontend storage to validate the UX.
-- **Production Validation:** In production, SabiMarkets will drop local state and exclusively query the Polymarket `Gamma API (/positions?user=0x...)` and the Polygon blockchain to derive the absolute truth of what Outcome Tokens a user holds. 
+| Contract | Address (Polygon) | Purpose |
+|---|---|---|
+| CTF Exchange | `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` | Buy/sell order routing |
+| USDC (native) | `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174` | Collateral token |
+| Conditional Tokens | `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | Outcome token holdings |
+| Neg Risk Adapter | `0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296` | Multi-outcome markets |
 
 ---
 
-## 💰 Monetization Strategy & Rewards Tracking
+## 3. Full System Architecture
 
-1. **Polymarket Builder API & Rewards:**
-   SabiMarkets uses a unique `NEXT_PUBLIC_POLY_BUILDER_KEY` assigned by Polymarket. Every API request and executed trade routed through our UI includes this header. Polymarket tracks the African volume generated by our frontend using this key, which dictates our eligibility for Builder Grants and volume-based incentive remittances.
-
-2. **Relayer Fees / Frontend Fee Injection:**
-   Polymarket's CLOB API allows interface operators (relayers) to append a small percentage fee (e.g., 0.5% - 1%) to trades routed through their specific UI. When users place a large order, a small fraction of the USDC spent goes to the SabiMarkets treasury wallet.
-
-3. **Fiat On/Off-Ramp Affilliates & Infrastructure:**
-   African users need Polygon USDC to trade. SabiMarkets plans to integrate localized fiat rails directly into the UI.
-   - **How it works:** We integrate widgets or APIs from providers like **Busha**, **YellowCard**, or **Paystack**. 
-   - **Deposit Flow:** A user clicks "Deposit Naira". A Busha iframe opens, allowing them to do a local bank transfer. Busha confirms the Naira receipt and automatically mints/transfers equivalent USDC to the user's connected Web3 Wallet address on the Polygon network.
-   - **Withdrawal Flow:** The user sends USDC back to the provider, who pays out Naira to their local bank.
-   - **Monetization:** SabiMarkets automatically earns an affiliate commission on the spread or volume of every fiat conversion done through our portal.
+```
+┌───────────────────────────────────────────────────────────────┐
+│                    USER (Browser / Mobile)                     │
+└────────────────────────────┬──────────────────────────────────┘
+                             │ HTTPS
+┌────────────────────────────▼──────────────────────────────────┐
+│              FRONTEND  ·  sabimarket.xyz                       │
+│  Next.js 16 App Router  ·  Vercel Edge Network                 │
+│                                                                │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐  │
+│  │ Market Feed │  │  Bet Modal   │  │  Portfolio Tracker  │  │
+│  │ (read-only) │  │  (CLOB sign) │  │  (Gamma API query)  │  │
+│  └─────────────┘  └──────────────┘  └─────────────────────┘  │
+└───────┬────────────────┬───────────────────────┬──────────────┘
+        │                │                       │
+        ▼                ▼                       ▼
+┌───────────────┐ ┌──────────────────┐ ┌────────────────────┐
+│  Polymarket   │ │  SabiMarket API  │ │  Polygon Mainnet   │
+│  Gamma API    │ │  (Next.js API    │ │  (via Alchemy RPC) │
+│  (read only)  │ │   Routes)        │ │                    │
+│               │ │                  │ │  ┌──────────────┐  │
+│  /markets     │ │  /api/order      │ │  │ CTF Exchange │  │
+│  /positions   │ │  /api/proxy      │ │  │ (Polymarket) │  │
+│  /trades      │ │  /api/portfolio  │ │  └──────────────┘  │
+└───────────────┘ └────────┬─────────┘ └────────────────────┘
+                           │
+                    ┌──────▼──────────────────┐
+                    │  Polymarket CLOB API     │
+                    │  clob.polymarket.com     │
+                    │                         │
+                    │  POST /order            │
+                    │  GET  /order-book       │
+                    │  GET  /trades           │
+                    └─────────────────────────┘
+```
 
 ---
 
-## Security & Custody
-- **Self-Custody:** SabiMarkets never holds private keys. User funds are secured by their own wallet provider (MetaMask, Coinbase Wallet, Trust Wallet).
-- **No Withdrawal Friction:** Users can withdraw their USDC directly from Polymarket's smart contracts to their wallets at any time.
+## 4. Environment Variables (All Keys)
 
-## Roadmap Forward
-- Integrate embedded / abstracted wallets (e.g., Privy or Magic.link) so users can sign up with an Email/Phone number and never realize they are using a Web3 wallet.
-- Direct Fiat on-ramps straight to the "Buy" button using local mobile money APIs.
+```bash
+# WalletConnect Cloud (Mobile wallet deep-links)
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID="d579a8a79998b9febf26831effd00175"
+
+# Polymarket Builder Program
+NEXT_PUBLIC_POLY_BUILDER_KEY="019a500c-f1a7-737d-88ad-788a12422964"
+POLY_BUILDER_API_KEY="019a500c-f1a7-737d-88ad-788a12422964"
+
+# Your Polygon Wallet (receives builder fee rebates automatically)
+BUILDER_WALLET_ADDRESS="0x8f0E9b15028311F263be1B71c1D5d8Ae8a35294e"
+NEXT_PUBLIC_BUILDER_WALLET_ADDRESS="0x8f0E9b15028311F263be1B71c1D5d8Ae8a35294e"
+
+# Polygon RPC (Alchemy)
+POLYGON_RPC_URL="https://polygon-mainnet.g.alchemy.com/v2/0eaW84ZOso5Dgsx8phHun"
+NEXT_PUBLIC_POLYGON_RPC_URL="https://polygon-mainnet.g.alchemy.com/v2/0eaW84ZOso5Dgsx8phHun"
+
+# Site
+NEXT_PUBLIC_SITE_URL="https://sabimarket.xyz"
+```
+
+> **On `BUILDER_WALLET_ADDRESS`:** `0x8f0E9b15028311F263be1B71c1D5d8Ae8a35294e` is your Polygon EOA.
+> Polymarket sends builder fee rebates here automatically whenever an order is tagged with your builder key. No contract needed for this.
+
+---
+
+## 5. Real Trading Flow (Step by Step)
+
+### Step 1 — User Connects Wallet
+RainbowKit + WalletConnect. Works on MetaMask, Coinbase Wallet, Trust Wallet, WalletConnect deep-link on mobile.
+
+### Step 2 — First Trade: Deploy Proxy Wallet
+```
+User clicks "Buy YES"
+  → Backend: GET /clob/auth/type
+  → If no proxy → POST /clob/auth/create-api-key
+  → User signs EIP-712 message to authorize proxy
+  → Proxy wallet address stored per user
+```
+
+### Step 3 — USDC Allowance (One-Time)
+```
+  → SabiMarket calls USDC contract:
+      approve(CTF_EXCHANGE_ADDRESS, MaxUint256)
+  → User signs transaction
+  → Never needed again for same wallet
+```
+
+### Step 4 — Place Order via CLOB
+```
+User enters amount → clicks Buy
+  → Backend builds order payload:
+    {
+      tokenId: "<outcome_token_id>",
+      price: 0.62,
+      side: "BUY",
+      size: 100,             ← USDC amount
+      maker: userAddress,
+      builder: "0x8f0E..."   ← your wallet = you earn fees
+    }
+  → User signs EIP-712 typed data in wallet
+  → POST signed order to Polymarket CLOB API
+  → Order matched → outcome tokens credited to proxy wallet
+```
+
+### Step 5 — Portfolio (Production)
+```
+Drop localStorage simulation entirely.
+  → GET gamma-api.polymarket.com/positions?user=0x{address}
+  → Returns real token holdings
+  → Show real P&L from blockchain truth
+```
+
+---
+
+## 6. API Routes To Build
+
+```
+src/app/api/
+├── clob/
+│   ├── auth/route.ts         ← creates proxy wallet per user
+│   ├── order/route.ts        ← signs + submits to CLOB
+│   └── positions/route.ts    ← fetches real user positions
+├── markets/
+│   └── route.ts              ← cached African market feed
+└── portfolio/
+    └── route.ts              ← aggregated P&L
+```
+
+**Install Polymarket SDK:**
+```bash
+npm install @polymarket/clob-client @polymarket/order-utils
+```
+
+---
+
+## 7. SabiProxy Factory Contract (Solidity)
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+interface IProxyFactory {
+    function deployProxy(address owner) external returns (address proxy);
+}
+
+contract SabiProxyFactory {
+    IProxyFactory constant POLY_FACTORY =
+        IProxyFactory(0xaB45c5A4B0c941a2F231C6f3C41a8e3E8F5D8e9C);
+
+    mapping(address => address) public userProxy;
+
+    event ProxyCreated(address indexed user, address proxy);
+
+    function getOrCreateProxy() external returns (address proxy) {
+        if (userProxy[msg.sender] != address(0))
+            return userProxy[msg.sender];
+        proxy = POLY_FACTORY.deployProxy(msg.sender);
+        userProxy[msg.sender] = proxy;
+        emit ProxyCreated(msg.sender, proxy);
+    }
+}
+```
+
+---
+
+## 8. Testing Strategy
+
+```bash
+# 1. Local unit tests (Hardhat)
+npx hardhat test
+
+# 2. Amoy Testnet (staging)
+#    Get test MATIC: https://faucet.polygon.technology/
+npx hardhat run scripts/deploy.ts --network amoy
+
+# 3. Polygon Mainnet
+npx hardhat run scripts/deploy.ts --network polygon
+```
+
+---
+
+## 9. Go-Live Checklist
+
+### Immediate (This Week)
+- [ ] Add all env vars to **Vercel Dashboard → Settings → Environment Variables**
+- [ ] Add `sabimarket.xyz` in **Vercel → Domains**, set DNS A record → `76.76.21.21`
+- [ ] Test mobile wallet connect end-to-end (MetaMask mobile + WalletConnect)
+- [ ] Verify Builder Program key at polymarket.com/builders
+
+### Real Trading (Weeks 2–3)
+- [ ] Install `@polymarket/clob-client`
+- [ ] Build `/api/clob/auth` — proxy wallet creation
+- [ ] Build `/api/clob/order` — signed order submission
+- [ ] Test full trade on Polygon **Amoy testnet**
+- [ ] Deploy `SabiProxyFactory` to Polygon Mainnet
+- [ ] Replace localStorage portfolio with Gamma API `/positions`
+
+### Business
+- [ ] Confirm `0x8f0E9b...` receives fee rebates after first trade
+- [ ] Set up error monitoring (Sentry)
+- [ ] Set up Vercel Analytics
+
+---
+
+## 10. Revenue Model
+
+| Source | How | Timeline |
+|---|---|---|
+| **Builder Fees** | Polymarket pays ~0.5–1% of trade volume to your wallet automatically | Day 1 of real orders |
+| **Spread** | Small markup on quoted prices | Phase 3 |
+| **Referral Fee Split** | Revenue share with users who refer others | Phase 4 |
+
+---
+
+## 11. 8-Week Timeline
+
+| Week | Goal |
+|---|---|
+| **1 (Now)** | Domain live, mobile wallet works, language picker fixed |
+| **2** | CLOB API routes built, test order signing on Amoy testnet |
+| **3** | SabiProxy contract deployed to Amoy + end-to-end trade test |
+| **4** | **Mainnet launch** — real trades, builder fees flowing |
+| **6** | Real portfolio from chain, remove localStorage simulation |
+| **8** | Search filters live, notifications, referral system |
