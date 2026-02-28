@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useLocale } from 'next-intl';
-import { ChevronDown, Globe, Loader2 } from 'lucide-react';
+import { ChevronDown, Globe, Loader2, X } from 'lucide-react';
 
 const LANGUAGES = [
   { code: 'en',  label: 'English',         flag: '🇬🇧', region: 'Global' },
@@ -37,10 +37,6 @@ export function LanguageSwitcher() {
     if (code === locale) { setIsOpen(false); return; }
     setLoading(true);
     setIsOpen(false);
-    // HARD full-page navigation so the Next.js server re-renders the page
-    // and runs translateMarkets() with the new locale.
-    // Client-side router.replace() only re-uses hydrated client state which
-    // keeps stale English market text.
     const segments = window.location.pathname.split('/').filter(Boolean);
     const newPath = KNOWN_LOCALES.includes(segments[0])
       ? '/' + code + (segments.length > 1 ? '/' + segments.slice(1).join('/') : '')
@@ -56,8 +52,19 @@ export function LanguageSwitcher() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Lock body scroll when dropdown is open on mobile
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
   return (
     <div ref={ref} className="relative">
+      {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={loading}
@@ -67,37 +74,81 @@ export function LanguageSwitcher() {
           ? <Loader2 size={13} className="animate-spin text-[#00D26A]" />
           : <Globe size={13} className="text-[#7A7068]" />
         }
-        <span className="hidden sm:inline text-[#7A7068]">{currentLang.flag}</span>
-        <span className="hidden sm:inline font-medium">{loading ? 'Loading...' : currentLang.label}</span>
+        <span className="text-[#7A7068]">{currentLang.flag}</span>
+        <span className="hidden sm:inline font-medium">{loading ? 'Loading…' : currentLang.label}</span>
         <ChevronDown size={12} className={`text-[#7A7068] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
+      {/* ── Mobile: full-screen bottom sheet ── */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 bg-[#0F0D0B] border border-white/[0.09] rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-up">
-          <div className="px-3 py-2 border-b border-white/[0.06]">
-            <p className="text-[10px] font-semibold text-[#7A7068] uppercase tracking-widest">Language / Uzungumzaji</p>
-          </div>
-          <div className="max-h-[320px] overflow-y-auto">
-            {LANGUAGES.map(lang => (
-              <button
-                key={lang.code}
-                onClick={() => handleSelect(lang.code)}
-                className={`cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-[13px] transition-colors hover:bg-white/[0.05] ${
-                  locale === lang.code ? 'bg-[#00D26A]/10 text-[#00D26A]' : 'text-[#ccc]'
-                }`}
-              >
-                <span className="text-base w-6 text-center">{lang.flag}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate">{lang.label}</p>
-                  <p className="text-[10px] text-[#7A7068] truncate">{lang.region}</p>
-                </div>
-                {locale === lang.code && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00D26A] shrink-0" />
-                )}
+        <>
+          {/* Backdrop */}
+          <div
+            className="sm:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Sheet */}
+          <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0F0D0B] border-t border-white/[0.09] rounded-t-2xl shadow-2xl max-h-[75vh] flex flex-col">
+            {/* Handle + title */}
+            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.06] shrink-0">
+              <div>
+                <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-3" />
+                <p className="text-[11px] font-semibold text-[#7A7068] uppercase tracking-widest">Select Language</p>
+              </div>
+              <button onClick={() => setIsOpen(false)} className="cursor-pointer p-2 rounded-lg text-[#7A7068] hover:text-white hover:bg-white/[0.08] transition-colors">
+                <X size={16} />
               </button>
-            ))}
+            </div>
+            <div className="overflow-y-auto">
+              {LANGUAGES.map(lang => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleSelect(lang.code)}
+                  className={`cursor-pointer w-full flex items-center gap-4 px-5 py-3.5 text-left text-[14px] transition-colors active:bg-white/[0.08] ${
+                    locale === lang.code ? 'bg-[#00D26A]/10 text-[#00D26A]' : 'text-[#ccc]'
+                  }`}
+                >
+                  <span className="text-xl w-8 text-center">{lang.flag}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold">{lang.label}</p>
+                    <p className="text-[11px] text-[#7A7068]">{lang.region}</p>
+                  </div>
+                  {locale === lang.code && (
+                    <span className="w-2 h-2 rounded-full bg-[#00D26A] shrink-0" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+
+          {/* ── Desktop: floating dropdown (unchanged) ── */}
+          <div className="hidden sm:block absolute right-0 top-full mt-2 w-64 bg-[#0F0D0B] border border-white/[0.09] rounded-xl shadow-2xl z-50 overflow-hidden">
+            <div className="px-3 py-2 border-b border-white/[0.06]">
+              <p className="text-[10px] font-semibold text-[#7A7068] uppercase tracking-widest">Language / Uzungumzaji</p>
+            </div>
+            <div className="max-h-[320px] overflow-y-auto">
+              {LANGUAGES.map(lang => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleSelect(lang.code)}
+                  className={`cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-[13px] transition-colors hover:bg-white/[0.05] ${
+                    locale === lang.code ? 'bg-[#00D26A]/10 text-[#00D26A]' : 'text-[#ccc]'
+                  }`}
+                >
+                  <span className="text-base w-6 text-center">{lang.flag}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold truncate">{lang.label}</p>
+                    <p className="text-[10px] text-[#7A7068] truncate">{lang.region}</p>
+                  </div>
+                  {locale === lang.code && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00D26A] shrink-0" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

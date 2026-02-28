@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAccount, useDisconnect, useBalance } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { 
-  Copy, ExternalLink, Settings, LogOut, ChevronDown, 
-  CheckCircle, Wallet, User, TrendingUp
+import {
+  Copy, ExternalLink, Settings, LogOut, ChevronDown,
+  CheckCircle, Wallet, TrendingUp
 } from 'lucide-react';
 import { useRouter } from '@/i18n/routing';
 
@@ -14,7 +14,6 @@ function shortenAddress(addr: string) {
 }
 
 function generateAvatarColors(addr: string) {
-  // deterministic gradient from address
   const h1 = parseInt(addr.slice(2, 4), 16) * 1.4;
   const h2 = (h1 + 140) % 360;
   return `linear-gradient(135deg, hsl(${h1},80%,55%) 0%, hsl(${h2},80%,45%) 100%)`;
@@ -45,12 +44,24 @@ export function WalletMenu() {
     }
   };
 
-  const handleViewOnPolygon = () => {
-    if (address) window.open(`https://polygonscan.com/address/${address}`, '_blank');
-  };
-
+  // Use RainbowKit's own ConnectButton.Custom so the modal works correctly
+  // on ALL devices including mobile (deep-links to MetaMask, WalletConnect, etc.)
   if (!isConnected || !address) {
-    return <ConnectButton showBalance={false} chainStatus="none" accountStatus="address" />;
+    return (
+      <ConnectButton.Custom>
+        {({ openConnectModal, connectModalOpen }) => (
+          <button
+            onClick={openConnectModal}
+            disabled={connectModalOpen}
+            className="cursor-pointer flex items-center gap-2 bg-[#00D26A] hover:bg-[#00B85E] text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-all active:scale-[0.97] disabled:opacity-70 shadow-lg shadow-[#00D26A]/20"
+          >
+            <Wallet size={14} />
+            <span className="hidden sm:inline">Connect Wallet</span>
+            <span className="sm:hidden">Connect</span>
+          </button>
+        )}
+      </ConnectButton.Custom>
+    );
   }
 
   const gradient = generateAvatarColors(address);
@@ -58,22 +69,17 @@ export function WalletMenu() {
 
   return (
     <div ref={ref} className="relative">
-      {/* Trigger Button */}
+      {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="cursor-pointer flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09] rounded-xl px-3 py-1.5 transition-all group"
+        className="cursor-pointer flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09] rounded-xl px-3 py-1.5 transition-all"
       >
-        {/* Avatar */}
-        <div 
-          className="w-6 h-6 rounded-full shrink-0 ring-1 ring-white/10"
-          style={{ background: gradient }}
-        />
-        {/* Address striped look */}
+        <div className="w-6 h-6 rounded-full shrink-0 ring-1 ring-white/10" style={{ background: gradient }} />
         <div className="hidden sm:flex items-center gap-1.5">
           <span className="font-mono text-[12px] text-white font-semibold tracking-tight">{short}</span>
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="w-[3px] h-[10px] rounded-full opacity-60"
+              <div key={i} className="w-[3px] h-[10px] rounded-full"
                    style={{ background: gradient, opacity: 0.4 + i * 0.12 }} />
             ))}
           </div>
@@ -83,13 +89,11 @@ export function WalletMenu() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 bg-[#0F0D0B] border border-white/[0.09] rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-up">
-          
+        <div className="absolute right-0 top-full mt-2 w-72 bg-[#0F0D0B] border border-white/[0.09] rounded-2xl shadow-2xl z-50 overflow-hidden">
           {/* Profile Header */}
           <div className="p-4 border-b border-white/[0.06]">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl ring-2 ring-white/10 flex-shrink-0"
-                   style={{ background: gradient }} />
+              <div className="w-10 h-10 rounded-xl ring-2 ring-white/10 shrink-0" style={{ background: gradient }} />
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-white text-[14px] truncate">{short}</p>
                 <p className="text-[11px] text-[#7A7068] flex items-center gap-1">
@@ -101,8 +105,7 @@ export function WalletMenu() {
             {balance && (
               <div className="flex items-center justify-between bg-white/[0.04] rounded-lg px-3 py-2 border border-white/[0.06]">
                 <div className="flex items-center gap-2 text-[12px] text-[#7A7068]">
-                  <Wallet size={12} />
-                  <span>Balance</span>
+                  <Wallet size={12} /><span>Balance</span>
                 </div>
                 <span className="font-mono text-sm font-bold text-white">
                   {(Number(balance.value) / 10 ** balance.decimals).toFixed(4)} {balance.symbol}
@@ -113,37 +116,19 @@ export function WalletMenu() {
 
           {/* Actions */}
           <div className="p-2">
-            <MenuItem 
-              icon={copied ? CheckCircle : Copy} 
-              label={copied ? 'Copied!' : 'Copy Address'} 
-              onClick={handleCopy}
-              color={copied ? '#00D26A' : undefined}
-            />
-            <MenuItem 
-              icon={ExternalLink} 
-              label="View on Polygon Scan" 
-              onClick={handleViewOnPolygon} 
-            />
-            <MenuItem 
-              icon={TrendingUp} 
-              label="My Portfolio" 
-              onClick={() => { setIsOpen(false); }} 
-            />
-            <MenuItem 
-              icon={Settings} 
-              label="Settings" 
-              onClick={() => { setIsOpen(false); router.push('/settings'); }} 
-            />
+            <MenuItem icon={copied ? CheckCircle : Copy} label={copied ? 'Copied!' : 'Copy Address'} onClick={handleCopy} color={copied ? '#00D26A' : undefined} />
+            <MenuItem icon={ExternalLink} label="View on Polygon Scan" onClick={() => { if (address) window.open(`https://polygonscan.com/address/${address}`, '_blank'); }} />
+            <MenuItem icon={TrendingUp} label="My Portfolio" onClick={() => setIsOpen(false)} />
+            <MenuItem icon={Settings} label="Settings" onClick={() => { setIsOpen(false); router.push('/settings'); }} />
           </div>
 
-          {/* Divider + Disconnect */}
+          {/* Disconnect */}
           <div className="border-t border-white/[0.06] p-2">
             <button
               onClick={() => { disconnect(); setIsOpen(false); }}
               className="cursor-pointer w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#FF4560] hover:bg-[#FF4560]/10 transition-colors text-[13px] font-semibold"
             >
-              <LogOut size={14} />
-              Disconnect Wallet
+              <LogOut size={14} /> Disconnect Wallet
             </button>
           </div>
         </div>
