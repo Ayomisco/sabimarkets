@@ -319,7 +319,12 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
       <BetModal isOpen={isHeroBetOpen} onClose={() => setHeroBetOpen(false)}
         market={heroMarket} selectedOutcome={heroOutcome}
         currentPrice={heroOutcome === 'YES' ? heroYesPrice : (1 - heroYesPrice)} />
-      <MarketDetailModal isOpen={isHeroDetailOpen} onClose={() => setHeroDetailOpen(false)} market={heroMarket} />
+      <MarketDetailModal 
+        isOpen={isHeroDetailOpen} 
+        onClose={() => setHeroDetailOpen(false)} 
+        market={heroMarket}
+        onBet={(outcome) => handleHeroBet(outcome)}
+      />
     </div>
   );
 }

@@ -6,16 +6,21 @@ import { Share2, BookmarkPlus, ExternalLink, TrendingUp, Clock, X, Zap, ArrowUpR
 import { useMarketStore } from "@/store/marketStore";
 import MarketChart from './MarketChart';
 
+import { useState } from 'react';
+
 export function MarketDetailModal({
   isOpen,
   onClose,
-  market
+  market,
+  onBet
 }: {
   isOpen: boolean;
   onClose: () => void;
   market: Market | null;
+  onBet?: (outcome: "YES" | "NO", price: number) => void;
 }) {
   const { livePrices } = useMarketStore();
+  const [selectedOutcome, setSelectedOutcome] = useState<"YES"|"NO">("YES");
 
   if (!market) return null;
 
@@ -173,39 +178,37 @@ export function MarketDetailModal({
                     const price = tId && livePrices[tId] !== undefined ? livePrices[tId] : parseFloat(outcomePrices[i] || "0.5");
                     const pct = Math.round(price * 100);
                     const isYes = i === 0;
+                    const isSelected = selectedOutcome === (isYes ? 'YES' : 'NO');
                     return (
-                      <button key={i} className={`cursor-pointer p-3 rounded-xl border font-bold flex flex-col items-center justify-center gap-1 transition-all hover:opacity-90 ${
-                        isYes ? 'bg-[#00D26A]/10 border-[#00D26A]/30 text-[#00D26A]' : 'bg-[#FF4560]/10 border-[#FF4560]/30 text-[#FF4560]'
+                      <button key={i} onClick={() => setSelectedOutcome(isYes ? 'YES' : 'NO')} className={`cursor-pointer p-3 rounded-xl border font-bold flex flex-col items-center justify-center gap-1 transition-all hover:opacity-90 ${
+                        isYes 
+                          ? (isSelected ? 'bg-[#00D26A]/20 border-[#00D26A] text-[#00D26A]' : 'bg-[#00D26A]/5 border-[#00D26A]/20 text-[#00D26A]/70')
+                          : (isSelected ? 'bg-[#FF4560]/20 border-[#FF4560] text-[#FF4560]' : 'bg-[#FF4560]/5 border-[#FF4560]/20 text-[#FF4560]/70')
                       }`}>
-                        <span className="text-[10px] text-[#7A7068] uppercase tracking-wider">{name}</span>
-                        <span className="text-[18px] font-bold text-white">{pct}¢</span>
+                        <span className="text-[10px] uppercase tracking-wider opacity-80">{name}</span>
+                        <span className="text-[18px] font-bold">{pct}¢</span>
                       </button>
                     );
                   })}
                 </div>
 
-                {/* Amount */}
-                <div className="relative mb-2">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7A7068] text-sm pointer-events-none">$</span>
-                  <input type="number" defaultValue={10} inputMode="decimal"
-                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl py-3 pl-8 pr-4 text-white font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#00D26A]/40 focus:border-[#00D26A]/30 transition-all"
-                    placeholder="Amount" />
-                </div>
-                <div className="grid grid-cols-4 gap-1.5 mb-4">
-                  {[10, 25, 50, 100].map(p => (
-                    <button key={p} className="cursor-pointer py-1.5 rounded-lg text-[11px] font-bold border border-white/[0.07] bg-white/[0.04] hover:bg-white/[0.09] text-[#7A7068] hover:text-white transition-all">
-                      ${p}
-                    </button>
-                  ))}
-                </div>
-
                 <p className="text-[10px] text-[#7A7068] text-center flex items-center justify-center gap-1.5 mb-3">
-                  <Zap size={10} className="text-[#00D26A]" /> Routed via Polymarket · Demo Mode
+                  <Zap size={10} className="text-[#00D26A]" /> Routed via Polymarket CLOB
                 </p>
 
-                <button className="cursor-pointer w-full py-3.5 rounded-xl font-bold text-[14px] text-black transition-all active:scale-[0.98]"
+                <button 
+                  onClick={() => {
+                    if (onBet) {
+                      const isYes = selectedOutcome === 'YES';
+                      const tId = market.tokens?.[isYes ? 0 : 1]?.token_id;
+                      const price = tId && livePrices[tId] !== undefined ? livePrices[tId] : parseFloat(outcomePrices[isYes ? 0 : 1] || "0.5");
+                      onBet(selectedOutcome, price);
+                      onClose();
+                    }
+                  }}
+                  className="cursor-pointer w-full py-3.5 rounded-xl font-bold text-[14px] text-black transition-all active:scale-[0.98]"
                   style={{ background: 'linear-gradient(135deg, #00D26A, #009A4E)', boxShadow: '0 4px 22px rgba(0,210,106,0.3)' }}>
-                  Place Order
+                  Continue to Order →
                 </button>
 
                 {/* Links row */}

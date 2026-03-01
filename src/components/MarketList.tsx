@@ -115,6 +115,11 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
                 isOpen={isDetailModalOpen} 
                 onClose={() => setDetailModalOpen(false)} 
                 market={selectedMarket}
+                onBet={(outcome, price) => {
+                    setSelectedOutcome(outcome);
+                    setSelectedPrice(price);
+                    setBetModalOpen(true);
+                }}
             />
 
             <BetModal 

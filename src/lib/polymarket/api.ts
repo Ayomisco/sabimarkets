@@ -33,20 +33,34 @@ function assignCategory(market: Market): string {
 
 export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: string })[]> {
   try {
-    // Fetch a massive pool of active markets to sift through
+    // Note: no next:revalidate — response is >2MB and Next.js cache rejects it.
+    // Vercel's CDN edge cache handles freshness via Cache-Control instead.
     const res = await fetch(`${GAMMA_API_URL}/markets?active=true&closed=false&limit=1000`, {
-      next: { revalidate: 60 } 
+      cache: 'no-store', // always fresh on each server render
     });
-    
+
     if (!res.ok) return [];
 
     const data: any[] = await res.json();
-    const parsedData: Market[] = data.map(m => ({
+    const parsedData: Market[] = data.map(m => {
+      const outcomePrices = typeof m.outcomePrices === 'string' ? JSON.parse(m.outcomePrices) : (m.outcomePrices || ['0.5', '0.5']);
+      const clobTokenIds: string[] = typeof m.clobTokenIds === 'string' ? JSON.parse(m.clobTokenIds) : (m.clobTokenIds || []);
+      // Normalise tokens array so token_id is always available
+      // Polymarket sometimes sends tokens[], sometimes only clobTokenIds[]
+      const tokens = Array.isArray(m.tokens) && m.tokens.length > 0
+        ? m.tokens
+        : clobTokenIds.map((id: string, i: number) => ({
+            token_id: id,
+            outcome: i === 0 ? 'Yes' : 'No',
+          }));
+      return {
         ...m,
-        outcomes: typeof m.outcomes === 'string' ? JSON.parse(m.outcomes) : m.outcomes,
-        outcomePrices: typeof m.outcomePrices === 'string' ? JSON.parse(m.outcomePrices) : m.outcomePrices,
-        clobTokenIds: typeof m.clobTokenIds === 'string' ? JSON.parse(m.clobTokenIds) : m.clobTokenIds,
-    }));
+        outcomes: typeof m.outcomes === 'string' ? JSON.parse(m.outcomes) : (m.outcomes || ['Yes', 'No']),
+        outcomePrices,
+        clobTokenIds,
+        tokens, // guaranteed to have token_id now
+      };
+    });
     
     // Sort strictly by volume to get the best markets at the top
     const sortedData = parsedData.sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume));
