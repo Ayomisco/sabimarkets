@@ -21,6 +21,7 @@ function generateAvatarColors(addr: string) {
 }
 
 export function WalletMenu() {
+  const [mounted, setMounted] = useState(false);
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: balance } = useBalance({ address });
@@ -30,6 +31,7 @@ export function WalletMenu() {
   const router = useRouter();
 
   useEffect(() => {
+    setMounted(true);
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
     };
@@ -48,6 +50,10 @@ export function WalletMenu() {
   const handleViewOnPolygon = () => {
     if (address) window.open(`https://polygonscan.com/address/${address}`, '_blank');
   };
+
+  if (!mounted) {
+    return <div className="w-[120px] h-10 bg-white/[0.05] border border-white/[0.09] rounded-xl animate-pulse" />;
+  }
 
   if (!isConnected || !address) {
     return <ConnectButton showBalance={false} chainStatus="none" accountStatus="address" />;
