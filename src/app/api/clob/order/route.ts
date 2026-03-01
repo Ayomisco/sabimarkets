@@ -5,6 +5,8 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 
+export const preferredRegion = 'fra1'; // Force Frankfurt, Germany (Bypasses Polymarket US Geoblock)
+
 const CLOB_URL = 'https://clob.polymarket.com';
 const BUILDER_KEY = process.env.POLY_BUILDER_API_KEY!;
 const BUILDER_WALLET = process.env.BUILDER_WALLET_ADDRESS!;

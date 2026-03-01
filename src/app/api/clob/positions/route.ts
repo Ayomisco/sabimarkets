@@ -5,6 +5,8 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 
+export const preferredRegion = 'fra1'; // Force Frankfurt, Germany (Bypasses Polymarket US Geoblock)
+
 const GAMMA_API = 'https://gamma-api.polymarket.com';
 
 export async function GET(req: NextRequest) {
