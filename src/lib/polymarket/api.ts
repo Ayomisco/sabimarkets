@@ -55,6 +55,8 @@ export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: str
           }));
       return {
         ...m,
+        condition_id: m.conditionId || m.condition_id || '',
+        slug: m.slug || '',
         outcomes: typeof m.outcomes === 'string' ? JSON.parse(m.outcomes) : (m.outcomes || ['Yes', 'No']),
         outcomePrices,
         clobTokenIds,
@@ -117,6 +119,8 @@ export async function getMarket(conditionId: string): Promise<Market | null> {
         if (!m) return null;
         return {
             ...m,
+            condition_id: m.conditionId || m.condition_id || '',
+            slug: m.slug || '',
             outcomes: typeof m.outcomes === 'string' ? JSON.parse(m.outcomes) : m.outcomes,
             outcomePrices: typeof m.outcomePrices === 'string' ? JSON.parse(m.outcomePrices) : m.outcomePrices,
             clobTokenIds: typeof m.clobTokenIds === 'string' ? JSON.parse(m.clobTokenIds) : m.clobTokenIds,

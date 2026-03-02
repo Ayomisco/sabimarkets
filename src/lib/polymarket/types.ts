@@ -7,6 +7,7 @@ export interface Token {
 export interface Market {
   id: string;
   condition_id: string;
+  slug: string;
   question: string;
   description: string;
   icon?: string;

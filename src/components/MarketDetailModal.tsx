@@ -74,7 +74,7 @@ export function MarketDetailModal({
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <a href={`https://polymarket.com/event/${market.condition_id}`}
+            <a href={`https://polymarket.com/event/${market.slug || market.condition_id}`}
                target="_blank" rel="noopener noreferrer"
                className="hidden sm:flex cursor-pointer items-center gap-1.5 px-2.5 py-1.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[11px] text-[#7A7068] hover:text-white transition-colors">
               <ExternalLink size={12} /> Polymarket
@@ -213,7 +213,7 @@ export function MarketDetailModal({
 
                 {/* Links row */}
                 <div className="flex items-center justify-center gap-3 mt-4">
-                  <a href={`https://polymarket.com/event/${market.condition_id}`}
+                  <a href={`https://polymarket.com/event/${market.slug || market.condition_id}`}
                      target="_blank" rel="noopener noreferrer"
                      className="cursor-pointer flex items-center gap-1 text-[11px] text-[#7A7068] hover:text-white transition-colors">
                     <ExternalLink size={11} /> View on Polymarket

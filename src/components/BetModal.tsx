@@ -328,13 +328,13 @@ export function BetModal({
               <span className="font-mono font-bold text-white">{shares}</span>
             </div>
             <div className="flex justify-between items-center px-4 py-2.5 text-[12px]">
-              <span className="text-[#7A7068]">Price (incl. 0.5% spread)</span>
-              <span className="font-mono font-bold text-white">{Math.round(spreadPrice * 100)}¢</span>
+              <span className="text-[#7A7068]">Avg Price</span>
+              <span className="font-mono font-bold text-white">{(spreadPrice * 100).toFixed(1)}¢</span>
             </div>
             <div className="flex justify-between items-center px-4 py-2.5 text-[12px]">
               <span className="text-[#7A7068]">Potential Return</span>
               <span className="font-mono font-bold" style={{ color: accentColor }}>
-                ${potentialPayoutDollars.toFixed(2)} (+{roi}%)
+                ${profitDollars.toFixed(2)} (+{roi}%)
               </span>
             </div>
           </div>
@@ -358,11 +358,11 @@ export function BetModal({
           </button>
 
           <div className="flex items-center justify-center gap-2 text-[10px] text-[#7A7068] -mt-2">
-            <span>Max win: ${potentialPayoutDollars.toFixed(2)}</span>
+            <span>Max win: ${profitDollars > 0 ? profitDollars.toFixed(2) : '0.00'}</span>
             <span>·</span>
             <span>Max loss: ${validAmount.toFixed(2)}</span>
             <span>·</span>
-            <a href="https://polymarket.com" target="_blank" className="flex items-center gap-1 hover:text-white transition-colors">
+            <a href={`https://polymarket.com/event/${market.slug || market.condition_id}`} target="_blank" className="flex items-center gap-1 hover:text-white transition-colors">
               <ExternalLink size={9} /> Polymarket
             </a>
           </div>
