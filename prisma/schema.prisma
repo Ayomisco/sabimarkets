@@ -7,13 +7,14 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  walletAddress String   @unique
-  email         String?  @unique
+  id            String    @id @default(uuid())
+  walletAddress String    @unique
+  email         String?   @unique
   username      String?
-  points        Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  points        Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  comments      Comment[] // Relation to comments
 }
 
 model MarketCuration {
@@ -23,4 +24,23 @@ model MarketCuration {
   category    String
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  marketId  String    // Polymarket condition_id
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String    @db.Text
+  parentId  String?   // For nested replies
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+  likes     Int       @default(0)
+  dislikes  Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([marketId])
+  @@index([userId])
+  @@index([parentId])
 }

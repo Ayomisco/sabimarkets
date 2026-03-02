@@ -2,9 +2,10 @@
 
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Market } from '@/lib/polymarket/types';
-import { Share2, BookmarkPlus, ExternalLink, TrendingUp, Clock, X, Zap, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Share2, BookmarkPlus, ExternalLink, TrendingUp, Clock, X, Zap } from 'lucide-react';
 import { useMarketStore } from "@/store/marketStore";
 import MarketChart from './MarketChart';
+import CommentSection from './CommentSection';
 
 import { useState } from 'react';
 
@@ -257,6 +258,9 @@ export function MarketDetailModal({
                     <BookmarkPlus size={11} /> Save
                   </button>
                 </div>
+
+                {/* Comments Section */}
+                <CommentSection marketId={market.condition_id} />
               </div>
             </div>
           </div>
