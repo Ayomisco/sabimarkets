@@ -2,6 +2,9 @@ import { Market } from './types';
 
 const GAMMA_API_URL = 'https://gamma-api.polymarket.com';
 
+// Raw response type from Polymarket API (before parsing)
+type RawMarketResponse = Record<string, unknown>;
+
 const AFRICAN_KEYWORDS = [
     // Countries
     'africa', 'african', 'algeria', 'angola', 'benin', 'botswana', 'burkina faso', 'burundi', 
@@ -20,7 +23,7 @@ const AFRICAN_KEYWORDS = [
     'casablanca', 'tunis', 'accra', 'kinshasa', 'algiers', 'khartoum',
     
     // Current leaders & politicians
-    'tinubu', 'ramaphosa', 'ruto', 'akufo-addo', 'buhari', 'mnangagwa', 'kagame', 
+    'tinubu', 'ramaphosa', 'ruto', 'akufo-addo', 'tinubu', 'mnangagwa', 'kagame', 
     'uhuru', 'kenyatta', 'sisi', 'tshisekedi', 'museveni', 'magufuli', 'macky sall',
     
     // Sports & culture
@@ -41,12 +44,24 @@ const AFRICAN_KEYWORDS = [
 ];
 
 /**
+ * Polymarket native tags for category-based fetching
+ */
+const POLYMARKET_TAGS = {
+    sports: 'sports',
+    crypto: 'crypto',
+    politics: 'politics',
+    pop_culture: 'pop-culture',
+    business: 'business',
+    science: 'science',
+};
+
+/**
  * Helper to categorize markets for the UI
  */
 function assignCategory(market: Market): string {
     const q = (market.question + ' ' + (market.description || '')).toLowerCase();
     
-    // Explicit exclusions or overrides
+    // Explicit categorization based on keywords
     if (q.includes('crypto') || q.includes('bitcoin') || q.includes('btc') || q.includes('eth') || q.includes('solana') || q.includes('airdrop') || q.includes('nft') || q.includes('doge')) return 'Crypto';
     if (q.includes('election') || q.includes('president') || q.includes('policy') || q.includes('tinubu') || q.includes('trump') || q.includes('biden') || q.includes('harris')) return 'Politics';
     if (q.includes('football') || q.includes('afcon') || q.includes('sports') || q.includes('match') || q.includes('team') || q.includes('nfl') || q.includes('nba')) return 'Sports';
@@ -56,50 +71,105 @@ function assignCategory(market: Market): string {
     return 'Global';
 }
 
-export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: string })[]> {
-  try {
-    // Note: no next:revalidate — response is >2MB and Next.js cache rejects it.
-    // Vercel's CDN edge cache handles freshness via Cache-Control instead.
-    const res = await fetch(`${GAMMA_API_URL}/markets?active=true&closed=false&limit=1000`, {
-      cache: 'no-store', // always fresh on each server render
-    });
-
-    if (!res.ok) return [];
-
-    const data: any[] = await res.json();
-    const parsedData: Market[] = data.map(m => {
-      const outcomePrices = typeof m.outcomePrices === 'string' ? JSON.parse(m.outcomePrices) : (m.outcomePrices || ['0.5', '0.5']);
-      const clobTokenIds: string[] = typeof m.clobTokenIds === 'string' ? JSON.parse(m.clobTokenIds) : (m.clobTokenIds || []);
-      // Normalise tokens array so token_id is always available
-      // Polymarket sometimes sends tokens[], sometimes only clobTokenIds[]
-      const tokens = Array.isArray(m.tokens) && m.tokens.length > 0
+/**
+ * Helper to parse and normalize market data from Polymarket API
+ */
+function parseMarket(m: RawMarketResponse): Market {
+    const outcomePrices = typeof m.outcomePrices === 'string' ? JSON.parse(m.outcomePrices as string) : (m.outcomePrices || ['0.5', '0.5']);
+    const clobTokenIds: string[] = typeof m.clobTokenIds === 'string' ? JSON.parse(m.clobTokenIds as string) : (m.clobTokenIds as string[] || []);
+    
+    // Normalize tokens array so token_id is always available
+    const tokens = Array.isArray(m.tokens) && (m.tokens as unknown[]).length > 0
         ? m.tokens
         : clobTokenIds.map((id: string, i: number) => ({
             token_id: id,
             outcome: i === 0 ? 'Yes' : 'No',
           }));
-      return {
+          
+    return {
         ...m,
-        condition_id: m.conditionId || m.condition_id || '',
-        slug: m.slug || '',
-        outcomes: typeof m.outcomes === 'string' ? JSON.parse(m.outcomes) : (m.outcomes || ['Yes', 'No']),
+        condition_id: (m.conditionId as string) || (m.condition_id as string) || '',
+        slug: (m.slug as string) || '',
+        outcomes: typeof m.outcomes === 'string' ? JSON.parse(m.outcomes as string) : (m.outcomes || ['Yes', 'No']),
         outcomePrices,
         clobTokenIds,
-        tokens, // guaranteed to have token_id now
-      };
-    });
-    
-    // Sort strictly by volume to get the best markets at the top
-    const sortedData = parsedData.sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume));
+        tokens,
+    } as Market;
+}
 
-    // First, grab anything technically African.
+/**
+ * Fetch markets by Polymarket's native tag with parallel requests
+ */
+async function fetchByTag(tag: string, limit: number = 50): Promise<Market[]> {
+    try {
+        const res = await fetch(
+            `${GAMMA_API_URL}/markets?tag=${tag}&active=true&closed=false&limit=${limit}`,
+            { cache: 'no-store' }
+        );
+        if (!res.ok) return [];
+        const data = await res.json() as RawMarketResponse[];
+        return data.map(parseMarket);
+    } catch (error) {
+        console.error(`Error fetching ${tag} markets:`, error);
+        return [];
+    }
+}
+
+/**
+ * Fetch high-volume global markets (no tag filter)
+ */
+async function fetchHighVolumeMarkets(limit: number = 100): Promise<Market[]> {
+    try {
+        const res = await fetch(
+            `${GAMMA_API_URL}/markets?active=true&closed=false&limit=${limit}`,
+            { cache: 'no-store' }
+        );
+        if (!res.ok) return [];
+        const data = await res.json() as RawMarketResponse[];
+        return data.map(parseMarket);
+    } catch (error) {
+        console.error('Error fetching high-volume markets:', error);
+        return [];
+    }
+}
+
+export async function fetchAfricanMarkets(): Promise<(Market & { uiCategory: string })[]> {
+  try {
+    // Parallel fetch from multiple Polymarket categories + high-volume markets
+    // This reduces payload size and leverages Polymarket's native categorization
+    const [sportsMarkets, cryptoMarkets, politicsMarkets, cultureMarkets, businessMarkets, highVolumeMarkets] = await Promise.all([
+        fetchByTag(POLYMARKET_TAGS.sports, 40),
+        fetchByTag(POLYMARKET_TAGS.crypto, 40),
+        fetchByTag(POLYMARKET_TAGS.politics, 30),
+        fetchByTag(POLYMARKET_TAGS.pop_culture, 30),
+        fetchByTag(POLYMARKET_TAGS.business, 30),
+        fetchHighVolumeMarkets(100),
+    ]);
+
+    // Combine all markets and deduplicate by condition_id
+    const allMarkets = [
+        ...sportsMarkets,
+        ...cryptoMarkets, 
+        ...politicsMarkets,
+        ...cultureMarkets,
+        ...businessMarkets,
+        ...highVolumeMarkets,
+    ];
+    
+    const uniqueMarkets = Array.from(
+        new Map(allMarkets.map(m => [m.condition_id, m])).values()
+    );
+    
+    // Sort by volume (highest first)
+    const sortedData = uniqueMarkets.sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume));
+
+    // Prioritize African markets
     const strictAfrican = sortedData.filter((market) => {
         const questionText = (market.question + ' ' + (market.description || '')).toLowerCase();
         return AFRICAN_KEYWORDS.some((keyword) => questionText.includes(keyword));
     });
 
-    // We still want a full dashboard. If African markets alone are too few, 
-    // we backfill with highly liquid global markets, but filter out only US-centric politics and conflicts
+    // Filter out US-centric politics and conflicts for fallback markets
     const avoidKeywords = [
         'trump', 'biden', 'kamala', 'harris', 'republican', 'democrat', 
         'senate', 'congress', 'california', 'new york', 'super bowl', 'nfl', 'nba',
