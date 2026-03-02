@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Market } from "@/lib/polymarket/types";
 import { useMarketStore } from "@/store/marketStore";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, ArrowUpRight } from "lucide-react";
 
 interface MarketCardProps {
   market: Market & { uiCategory?: string };
@@ -32,9 +32,20 @@ export function MarketCard({ market, index, onMarketClick, onBetClick }: MarketC
     ? livePrices[noAssetId] 
     : parseFloat(market.outcomePrices?.[1] || "0.5");
 
-  const yesPercent = Math.round(rawYesPrice * 100);
-  const noPercent = Math.round(rawNoPrice * 100);
+  // Format percentages: show decimal for values < 1%
+  const formatPercent = (price: number) => {
+    const pct = price * 100;
+    return pct < 1 && pct > 0 ? pct.toFixed(1) : Math.round(pct).toString();
+  };
+
+  const yesPercent = parseFloat(formatPercent(rawYesPrice));
+  const noPercent = parseFloat(formatPercent(rawNoPrice));
+  const yesDisplay = formatPercent(rawYesPrice);
+  const noDisplay = formatPercent(rawNoPrice);
   const isHot = volUSDC > 500000;
+
+  // Check if this is a multi-outcome market (>2 outcomes)
+  const isMultiOutcome = market.outcomes && market.outcomes.length > 2;
 
   return (
     <motion.div
@@ -81,8 +92,8 @@ export function MarketCard({ market, index, onMarketClick, onBetClick }: MarketC
         {/* Probability bar */}
         <div className="mb-3">
           <div className="flex items-center justify-between text-[10px] text-[#7A7068] mb-1">
-            <span>YES {yesPercent}%</span>
-            <span>NO {noPercent}%</span>
+            <span>YES {yesDisplay}%</span>
+            <span>NO {noDisplay}%</span>
           </div>
           <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
             <div 
@@ -95,21 +106,36 @@ export function MarketCard({ market, index, onMarketClick, onBetClick }: MarketC
           </div>
         </div>
 
-        {/* Bet Buttons */}
-        <div className="flex gap-2 mt-auto">
-          <button 
-            onClick={(e) => onBetClick(e, market, "YES", rawYesPrice)}
-            className="flex-1 py-2 rounded-xl text-[12px] font-bold bg-[#00D26A]/10 text-[#00D26A] border border-[#00D26A]/25 hover:bg-[#00D26A] hover:text-black transition-all duration-200 cursor-pointer"
-          >
-            Yes · {yesPercent}¢
-          </button>
-          <button 
-            onClick={(e) => onBetClick(e, market, "NO", rawNoPrice)}
-            className="flex-1 py-2 rounded-xl text-[12px] font-bold bg-[#FF4560]/10 text-[#FF4560] border border-[#FF4560]/25 hover:bg-[#FF4560] hover:text-white transition-all duration-200 cursor-pointer"
-          >
-            No · {noPercent}¢
-          </button>
-        </div>
+        {/* Bet Buttons - Hide for multi-outcome markets */}
+        {!isMultiOutcome && (
+          <div className="flex gap-2 mt-auto">
+            <button 
+              onClick={(e) => onBetClick(e, market, "YES", rawYesPrice)}
+              className="flex-1 py-2 rounded-xl text-[12px] font-bold bg-[#00D26A]/10 text-[#00D26A] border border-[#00D26A]/25 hover:bg-[#00D26A] hover:text-black transition-all duration-200 cursor-pointer"
+            >
+              Yes · {yesDisplay}¢
+            </button>
+            <button 
+              onClick={(e) => onBetClick(e, market, "NO", rawNoPrice)}
+              className="flex-1 py-2 rounded-xl text-[12px] font-bold bg-[#FF4560]/10 text-[#FF4560] border border-[#FF4560]/25 hover:bg-[#FF4560] hover:text-white transition-all duration-200 cursor-pointer"
+            >
+              No · {noDisplay}¢
+            </button>
+          </div>
+        )}
+        
+        {/* Multi-outcome indicator */}
+        {isMultiOutcome && (
+          <div className="mt-auto">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onMarketClick(market); }}
+              className="w-full py-2 rounded-xl text-[12px] font-bold bg-white/[0.05] text-white border border-white/[0.10] hover:bg-white/[0.08] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>{market.outcomes.length} Outcomes</span>
+              <ArrowUpRight size={12} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Footer */}
