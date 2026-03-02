@@ -25,13 +25,13 @@ export function BetModal({
   isOpen, onClose, market, selectedOutcome: initialOutcome,
 }: {
   isOpen: boolean; onClose: () => void; market: Market | null;
-  selectedOutcome: "YES" | "NO" | null; currentPrice?: number;
+  selectedOutcome: string | null; currentPrice?: number;
 }) {
   const [amount, setAmount] = useState<number | string>(10);
   const [isSigning, setIsSigning] = useState(false);
   const [step, setStep] = useState<'idle' | 'signing' | 'submitting' | 'done' | 'error'>('idle');
   const [txError, setTxError] = useState('');
-  const [selectedOutcome, setSelectedOutcome] = useState<"YES" | "NO">(initialOutcome || "YES");
+  const [selectedOutcome, setSelectedOutcome] = useState<string>(initialOutcome || "YES");
 
   // Get live prices from store
   const { livePrices } = useMarketStore();
@@ -39,6 +39,14 @@ export function BetModal({
   const { address } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
   const { success: toastSuccess, error: toastError, warning: toastWarning, info: toastInfo } = useToast();
+
+  // Read USDC balance
+  const { data: usdcBalance } = useReadContract({
+    address: USDC_ADDRESS,
+    abi: USDC_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+  });
 
   // Sync outcome when modal opens with new selection
   useEffect(() => {
@@ -55,41 +63,44 @@ export function BetModal({
     }
   }, [isOpen]);
 
-  const isYes = selectedOutcome === 'YES';
-  const accentColor = isYes ? '#00D26A' : '#FF4560';
+  // Early return after all hooks
+  if (!market || !selectedOutcome) return null;
+
+  const outcomes = market.outcomes || ["Yes", "No"];
+  
+  // Find the selected outcome index
+  const selectedIndex = outcomes.findIndex(o => 
+    o.toLowerCase() === selectedOutcome.toLowerCase()
+  );
+  const outcomeIndex = selectedIndex >= 0 ? selectedIndex : 0;
+  
+  // Determine accent color based on outcome position
+  let accentColor = '#00D26A'; // green (first outcome / YES)
+  if (outcomes.length === 2) {
+    // Binary: green for first, red for second
+    accentColor = outcomeIndex === 0 ? '#00D26A' : '#FF4560';
+  } else if (outcomes.length > 2) {
+    // Multi-outcome: green first, blue middle, red last
+    if (outcomeIndex === outcomes.length - 1) {
+      accentColor = '#FF4560'; // red
+    } else if (outcomeIndex > 0) {
+      accentColor = '#3B82F6'; // blue
+    }
+  }
 
   // Get prices from Polymarket data (live prices or fallback to market data)
-  const yesTokenId = market?.tokens?.[0]?.token_id;
-  const noTokenId = market?.tokens?.[1]?.token_id;
-  
-  const yesPrice = yesTokenId && livePrices[yesTokenId] !== undefined 
-    ? livePrices[yesTokenId] 
-    : parseFloat(market?.outcomePrices?.[0] || "0.5");
-  const noPrice = noTokenId && livePrices[noTokenId] !== undefined 
-    ? livePrices[noTokenId] 
-    : parseFloat(market?.outcomePrices?.[1] || "0.5");
+  const selectedTokenId = market.tokens?.[outcomeIndex]?.token_id;
+  const selectedPrice = selectedTokenId && livePrices[selectedTokenId] !== undefined
+    ? livePrices[selectedTokenId]
+    : parseFloat(market.outcomePrices?.[outcomeIndex] || "0.5");
   
   // Use the correct price based on selected outcome
-  const basePrice = isYes ? yesPrice : noPrice;
-
-  // Read USDC balance
-  const { data: usdcBalance } = useReadContract({
-    address: USDC_ADDRESS,
-    abi: USDC_ABI,
-    functionName: 'balanceOf',
-    args: address ? [address] : undefined,
-  });
-
-  if (!market || !selectedOutcome) return null;
+  const basePrice = selectedPrice;
 
   const validAmount = typeof amount === 'string' && amount === "" ? 0 : Number(amount);
 
   // Use Polymarket's exact price (no spread markup)
   const price = Math.max(0.01, Math.min(0.99, basePrice));
-
-  // Prices in cents for display
-  const yesPriceCents = Math.round(yesPrice * 100);
-  const noPriceCents = Math.round(noPrice * 100);
 
   // Shares = amount / price per share (each share pays $1 if outcome wins)
   const shares = price > 0 ? (validAmount / price).toFixed(1) : "0.0";
@@ -104,7 +115,7 @@ export function BetModal({
     ? Number(formatUnits(usdcBalance as bigint, 6)) >= validAmount
     : true;
 
-  const tokenId = market.tokens?.[selectedOutcome === 'YES' ? 0 : 1]?.token_id;
+  const tokenId = market.tokens?.[outcomeIndex]?.token_id;
 
   const handlePlaceOrder = async () => {
     if (!address) {
@@ -169,7 +180,7 @@ export function BetModal({
           expiration: BigInt(0),
           nonce: BigInt(0),
           feeRateBps: BigInt(0),
-          side: isYes ? 0 : 1,
+          side: outcomeIndex,
           signatureType: 0,
         }
       });
@@ -183,7 +194,7 @@ export function BetModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tokenId,
-          side: isYes ? 'BUY' : 'SELL',
+          side: outcomeIndex === 0 ? 'BUY' : 'SELL',
           price: price,
           size: validAmount,
           userAddress: address,
@@ -201,14 +212,15 @@ export function BetModal({
       setStep('done');
       toastSuccess(
         '🎉 Order placed!',
-        `${shares} ${selectedOutcome} shares @ ${isYes ? yesPriceCents : noPriceCents}¢. Order ID: ${data.orderId?.slice(0, 8)}...`
+        `${shares} ${selectedOutcome} shares @ ${(price * 100).toFixed(1)}¢. Order ID: ${data.orderId?.slice(0, 8)}...`
       );
       setTimeout(() => { onClose(); setStep('idle'); }, 2000);
 
-    } catch (err: any) {
-      const msg = err?.message?.includes('rejected')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const msg = errorMessage.includes('rejected')
         ? 'You rejected the signature — no order was placed.'
-        : err?.message || 'Something went wrong.';
+        : errorMessage || 'Something went wrong.';
       setTxError(msg);
       setStep('error');
       toastError('Order failed', msg);
@@ -252,7 +264,7 @@ export function BetModal({
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
               <div className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border"
                    style={{ color: accentColor, backgroundColor: `${accentColor}18`, borderColor: `${accentColor}30` }}>
-                {isYes ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />} Betting {selectedOutcome}
+                {outcomeIndex === 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />} Betting {selectedOutcome}
               </div>
               <span className="text-[10px] text-[#7A7068] flex items-center gap-1">
                 <Zap size={9} className="text-[#00D26A]" /> Live · Polymarket CLOB
@@ -269,22 +281,49 @@ export function BetModal({
         {/* Body */}
         <div className="px-5 pt-4 pb-6 flex flex-col gap-4 overflow-y-auto max-h-[72vh] sm:max-h-none">
 
-          {/* YES / NO */}
-          <div className="grid grid-cols-2 gap-2">
-            <button 
-              onClick={() => setSelectedOutcome('YES')}
-              className="cursor-pointer py-3 rounded-xl border font-bold text-sm flex items-center justify-center gap-1.5 transition-all"
-              style={isYes ? { backgroundColor: '#00D26A', borderColor: '#00D26A', color: '#000', boxShadow: '0 4px 18px rgba(0,210,106,0.35)' }
-                          : { borderColor: 'rgba(255,255,255,0.08)', color: '#7A7068' }}>
-              <ArrowUpRight size={14} /> YES · {yesPriceCents}¢
-            </button>
-            <button 
-              onClick={() => setSelectedOutcome('NO')}
-              className="cursor-pointer py-3 rounded-xl border font-bold text-sm flex items-center justify-center gap-1.5 transition-all"
-              style={!isYes ? { backgroundColor: '#FF4560', borderColor: '#FF4560', color: '#fff', boxShadow: '0 4px 18px rgba(255,69,96,0.35)' }
-                           : { borderColor: 'rgba(255,255,255,0.08)', color: '#7A7068' }}>
-              <ArrowDownRight size={14} /> NO · {noPriceCents}¢
-            </button>
+          {/* Outcome Selector */}
+          <div className={`grid gap-2 ${outcomes.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {outcomes.map((outcome, idx) => {
+              const tokenId = market.tokens?.[idx]?.token_id;
+              const price = tokenId && livePrices[tokenId] !== undefined
+                ? livePrices[tokenId]
+                : parseFloat(market.outcomePrices?.[idx] || "0.5");
+              const priceCents = Math.round(price * 100);
+              const isSelected = selectedOutcome?.toLowerCase() === outcome.toLowerCase();
+              
+              // Color coding: first=green, middle=blue, last=red
+              let activeColor = '#00D26A'; // green
+              let shadowColor = 'rgba(0,210,106,0.35)';
+              let textColor = '#000';
+              if (outcomes.length > 2) {
+                if (idx === outcomes.length - 1) {
+                  activeColor = '#FF4560'; // red
+                  shadowColor = 'rgba(255,69,96,0.35)';
+                  textColor = '#fff';
+                } else if (idx > 0) {
+                  activeColor = '#3B82F6'; // blue
+                  shadowColor = 'rgba(59,130,246,0.35)';
+                  textColor = '#fff';
+                }
+              } else if (idx === 1) {
+                activeColor = '#FF4560'; // red for NO
+                shadowColor = 'rgba(255,69,96,0.35)';
+                textColor = '#fff';
+              }
+              
+              return (
+                <button 
+                  key={outcome}
+                  onClick={() => setSelectedOutcome(outcome)}
+                  className="cursor-pointer py-3 rounded-xl border font-bold text-sm flex items-center justify-center gap-1.5 transition-all"
+                  style={isSelected 
+                    ? { backgroundColor: activeColor, borderColor: activeColor, color: textColor, boxShadow: `0 4px 18px ${shadowColor}` }
+                    : { borderColor: 'rgba(255,255,255,0.08)', color: '#7A7068' }}>
+                  {idx === 0 || (outcomes.length === 2 && idx === 0) ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                  {outcome.toUpperCase()} · {priceCents}¢
+                </button>
+              );
+            })}
           </div>
 
           {/* USDC balance indicator */}
@@ -307,7 +346,7 @@ export function BetModal({
                 className={`w-full bg-white/[0.05] border rounded-xl py-3 pl-8 pr-4 text-white font-mono font-bold text-[15px] focus:outline-none transition-all ${
                   !hasEnoughUsdc ? 'border-[#FF4560]/40' : 'border-white/[0.08] focus:ring-1'
                 }`}
-                style={hasEnoughUsdc ? { '--tw-ring-color': accentColor } as any : {}}
+                style={hasEnoughUsdc ? { '--tw-ring-color': accentColor } as React.CSSProperties : {}}
               />
             </div>
             <div className="grid grid-cols-4 gap-1.5">
@@ -351,7 +390,11 @@ export function BetModal({
             disabled={isSigning || validAmount <= 0 || !hasEnoughUsdc || step === 'done'}
             onClick={handlePlaceOrder}
             className="cursor-pointer w-full py-4 rounded-xl font-bold text-[15px] transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            style={{ backgroundColor: step === 'done' ? '#00D26A' : accentColor, color: isYes || step === 'done' ? '#000' : '#fff', boxShadow: `0 6px 24px ${accentColor}45` }}
+            style={{ 
+              backgroundColor: step === 'done' ? '#00D26A' : accentColor, 
+              color: step === 'done' || accentColor === '#00D26A' ? '#000' : '#fff', 
+              boxShadow: `0 6px 24px ${accentColor}45` 
+            }}
           >
             {(step === 'signing' || step === 'submitting') ? <><Loader2 className="animate-spin" size={16} /> {statusLabel}</> : statusLabel}
           </button>

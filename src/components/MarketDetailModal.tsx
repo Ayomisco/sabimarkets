@@ -17,15 +17,16 @@ export function MarketDetailModal({
   isOpen: boolean;
   onClose: () => void;
   market: Market | null;
-  onBet?: (outcome: "YES" | "NO", price: number) => void;
+  onBet?: (outcome: string, price: number) => void;
 }) {
   const { livePrices } = useMarketStore();
-  const [selectedOutcome, setSelectedOutcome] = useState<"YES"|"NO">("YES");
+  const [selectedOutcome, setSelectedOutcome] = useState<string>("YES");
 
   if (!market) return null;
 
   const outcomes = market.outcomes || ["Yes", "No"];
   const outcomePrices = market.outcomePrices || ["0.5", "0.5"];
+  const isMultiOutcome = outcomes.length > 2;
   const volUSDC = parseInt(market.volume || "0");
   const stringVol = volUSDC >= 1_000_000
     ? (volUSDC / 1_000_000).toFixed(1) + 'M'
@@ -127,24 +128,37 @@ export function MarketDetailModal({
                   {outcomes.map((name: string, i: number) => {
                     const tId = market.tokens?.[i]?.token_id;
                     const price = tId && livePrices[tId] !== undefined ? livePrices[tId] : parseFloat(outcomePrices[i] || "0.5");
-                    const pct = Math.round(price * 100);
-                    const isYes = i === 0;
+                    // Format percentage: show decimal for values < 1%
+                    const pct = price * 100;
+                    const pctDisplay = pct < 1 && pct > 0 ? pct.toFixed(1) : Math.round(pct).toString();
+                    // Color coding: green for first, red for last, blue for middle outcomes
+                    const getOutcomeColor = (index: number) => {
+                      if (!isMultiOutcome) return index === 0 ? '#00D26A' : '#FF4560';
+                      if (index === 0) return '#00D26A';
+                      if (index === outcomes.length - 1) return '#FF4560';
+                      return '#3B82F6'; // blue for middle outcomes
+                    };
+                    const color = getOutcomeColor(i);
                     return (
                       <div key={i} className="flex items-center bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 gap-3 hover:border-white/[0.12] transition-colors">
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${isYes ? 'bg-[#00D26A]' : 'bg-[#FF4560]'}`} />
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
                         <span className="font-semibold text-white text-[13px] flex-1">{name}</span>
                         <div className="hidden sm:block w-20">
                           <div className="h-1 rounded-full bg-white/[0.08]">
-                            <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: isYes ? '#00D26A' : '#FF4560' }} />
+                            <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
                           </div>
                         </div>
-                        <span className="font-bold font-mono text-white w-10 text-right text-[14px]">{pct}%</span>
-                        <button className={`cursor-pointer px-3 py-1.5 rounded-lg font-bold text-[11px] transition-all border ${
-                          isYes
-                            ? 'bg-[#00D26A]/10 text-[#00D26A] border-[#00D26A]/25 hover:bg-[#00D26A] hover:text-black'
-                            : 'bg-[#FF4560]/10 text-[#FF4560] border-[#FF4560]/25 hover:bg-[#FF4560] hover:text-white'
-                        }`}>
-                          {price.toFixed(2)}
+                        <span className="font-bold font-mono text-white w-10 text-right text-[14px]">{pctDisplay}%</span>
+                        <button 
+                          onClick={() => {
+                            setSelectedOutcome(name);
+                            if (onBet) {
+                              onBet(name, price);
+                              onClose();
+                            }
+                          }}
+                          className="cursor-pointer px-3 py-1.5 rounded-lg font-bold text-[11px] transition-all border bg-white/[0.05] border-white/[0.1] hover:bg-white/[0.1] text-white">
+                          {(price * 100).toFixed(1)}¢
                         </button>
                       </div>
                     );
@@ -171,22 +185,39 @@ export function MarketDetailModal({
                   </span>
                 </div>
 
-                {/* Outcome buttons */}
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                  {outcomes.slice(0, 2).map((name: string, i: number) => {
+                {/* Outcome buttons - dynamic grid based on count */}
+                <div className={`grid gap-2 mb-4 ${isMultiOutcome ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                  {outcomes.map((name: string, i: number) => {
                     const tId = market.tokens?.[i]?.token_id;
                     const price = tId && livePrices[tId] !== undefined ? livePrices[tId] : parseFloat(outcomePrices[i] || "0.5");
-                    const pct = Math.round(price * 100);
-                    const isYes = i === 0;
-                    const isSelected = selectedOutcome === (isYes ? 'YES' : 'NO');
+                    const pct = price * 100;
+                    const pctDisplay = pct < 1 && pct > 0 ? pct.toFixed(1) : Math.round(pct).toString();
+                    const isSelected = selectedOutcome === name;
+                    // Color coding
+                    const getOutcomeColor = (index: number) => {
+                      if (!isMultiOutcome) return index === 0 ? '#00D26A' : '#FF4560';
+                      if (index === 0) return '#00D26A';
+                      if (index === outcomes.length - 1) return '#FF4560';
+                      return '#3B82F6';
+                    };
+                    const color = getOutcomeColor(i);
                     return (
-                      <button key={i} onClick={() => setSelectedOutcome(isYes ? 'YES' : 'NO')} className={`cursor-pointer p-3 rounded-xl border font-bold flex flex-col items-center justify-center gap-1 transition-all hover:opacity-90 ${
-                        isYes 
-                          ? (isSelected ? 'bg-[#00D26A]/20 border-[#00D26A] text-[#00D26A]' : 'bg-[#00D26A]/5 border-[#00D26A]/20 text-[#00D26A]/70')
-                          : (isSelected ? 'bg-[#FF4560]/20 border-[#FF4560] text-[#FF4560]' : 'bg-[#FF4560]/5 border-[#FF4560]/20 text-[#FF4560]/70')
-                      }`}>
-                        <span className="text-[10px] uppercase tracking-wider opacity-80">{name}</span>
-                        <span className="text-[18px] font-bold">{pct}¢</span>
+                      <button 
+                        key={i} 
+                        onClick={() => setSelectedOutcome(name)} 
+                        className={`cursor-pointer rounded-xl border font-bold transition-all hover:opacity-90 ${
+                          isMultiOutcome 
+                            ? 'p-2.5 flex items-center justify-between' 
+                            : 'p-3 flex flex-col items-center justify-center gap-1'
+                        } ${isSelected ? 'ring-2' : ''}`}
+                        style={{
+                          backgroundColor: isSelected ? `${color}20` : `${color}08`,
+                          borderColor: isSelected ? color : `${color}30`,
+                          color: isSelected ? color : `${color}99`,
+                          '--tw-ring-color': color
+                        } as React.CSSProperties}>
+                        <span className={isMultiOutcome ? "text-[12px] font-semibold" : "text-[10px] uppercase tracking-wider opacity-80"}>{name}</span>
+                        <span className={isMultiOutcome ? "text-[14px] font-bold font-mono" : "text-[18px] font-bold"}>{pctDisplay}¢</span>
                       </button>
                     );
                   })}
@@ -199,9 +230,9 @@ export function MarketDetailModal({
                 <button 
                   onClick={() => {
                     if (onBet) {
-                      const isYes = selectedOutcome === 'YES';
-                      const tId = market.tokens?.[isYes ? 0 : 1]?.token_id;
-                      const price = tId && livePrices[tId] !== undefined ? livePrices[tId] : parseFloat(outcomePrices[isYes ? 0 : 1] || "0.5");
+                      const selectedIndex = outcomes.indexOf(selectedOutcome);
+                      const tId = market.tokens?.[selectedIndex]?.token_id;
+                      const price = tId && livePrices[tId] !== undefined ? livePrices[tId] : parseFloat(outcomePrices[selectedIndex] || "0.5");
                       onBet(selectedOutcome, price);
                       onClose();
                     }

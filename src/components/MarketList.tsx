@@ -16,7 +16,7 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
     const [isDetailModalOpen, setDetailModalOpen] = useState(false);
     const [isBetModalOpen, setBetModalOpen] = useState(false);
     const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
-    const [selectedOutcome, setSelectedOutcome] = useState<"YES"|"NO"|null>(null);
+    const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null);
     const [selectedPrice, setSelectedPrice] = useState<number>(0);
 
     usePolymarketWSS();
