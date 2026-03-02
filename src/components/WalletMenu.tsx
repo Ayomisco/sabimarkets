@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useAccount, useDisconnect, useBalance } from 'wagmi';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { 
   Copy, ExternalLink, Settings, LogOut, ChevronDown, 
   CheckCircle, Wallet, User, TrendingUp
@@ -25,6 +25,7 @@ export function WalletMenu() {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: balance } = useBalance({ address });
+  const { openConnectModal } = useConnectModal();
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -56,7 +57,15 @@ export function WalletMenu() {
   }
 
   if (!isConnected || !address) {
-    return <ConnectButton showBalance={false} chainStatus="none" accountStatus="address" />;
+    return (
+      <button
+        onClick={openConnectModal}
+        className="cursor-pointer flex items-center gap-2 px-3 py-1.5 bg-[#00D26A] hover:bg-[#00B85E] text-black text-[13px] font-bold rounded-xl transition-all"
+      >
+        <Wallet size={13} />
+        <span>Connect</span>
+      </button>
+    );
   }
 
   const gradient = generateAvatarColors(address);

@@ -7,7 +7,8 @@ import { useMarketStore } from "@/store/marketStore";
 import MarketChart from './MarketChart';
 import CommentSection from './CommentSection';
 import { useToast } from './Toast';
-import { useAccount, useReadContract } from 'wagmi';
+import { useAccount, useReadContract, useChainId, useSwitchChain } from 'wagmi';
+import { polygon } from 'wagmi/chains';
 import { formatUnits } from 'viem';
 
 import { useState } from 'react';
@@ -30,17 +31,21 @@ export function MarketDetailModal({
 }) {
   const { livePrices } = useMarketStore();
   const { address } = useAccount();
-  const { error: toastError, warning: toastWarning } = useToast();
+  const chainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
+  const { error: toastError, warning: toastWarning, success: toastSuccess } = useToast();
 
   const [selectedOutcome, setSelectedOutcome] = useState<string>("YES");
   const [orderAmount, setOrderAmount] = useState<number | string>(10);
+  const [isSwitchingChain, setIsSwitchingChain] = useState(false);
 
-  // Read USDC balance
+  // Read USDC balance — force Polygon RPC regardless of wallet's current chain
   const { data: usdcBalance } = useReadContract({
     address: USDC_ADDRESS,
     abi: USDC_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
+    chainId: polygon.id,
   });
 
   if (!market) return null;
@@ -320,17 +325,31 @@ export function MarketDetailModal({
                         </button>
                       ) : (
                         <button
-                          disabled={validAmount <= 0 || !hasEnoughUsdc}
-                          onClick={() => {
+                          disabled={validAmount <= 0 || !hasEnoughUsdc || isSwitchingChain}
+                          onClick={async () => {
                             const tid = market.tokens?.[selIdx]?.token_id;
                             if (!tid) { toastError('Market error', 'No token ID found for this outcome'); return; }
                             if (validAmount <= 0) { toastWarning('Invalid amount', 'Enter an amount greater than 0'); return; }
                             if (!hasEnoughUsdc) { toastError('Insufficient USDC', `You need $${validAmount} USDC`); return; }
+                            // Auto-switch to Polygon if on wrong chain
+                            if (chainId !== polygon.id) {
+                              try {
+                                setIsSwitchingChain(true);
+                                await switchChainAsync({ chainId: polygon.id });
+                                toastSuccess('Network switched', 'Now on Polygon — placing your order…');
+                              } catch {
+                                toastError('Switch failed', 'Please switch to Polygon in your wallet and try again');
+                                setIsSwitchingChain(false);
+                                return;
+                              } finally {
+                                setIsSwitchingChain(false);
+                              }
+                            }
                             if (onBet) { onBet(selectedOutcome, boundedPrice); onClose(); }
                           }}
                           className="cursor-pointer w-full py-3.5 rounded-xl font-bold text-[14px] transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                          style={{ backgroundColor: accentClr, color: accentClr === '#00D26A' ? '#000' : '#fff', boxShadow: `0 4px 22px ${accentClr}45` }}>
-                          Buy {selectedOutcome} · {(boundedPrice * 100).toFixed(1)}¢
+                          style={{ backgroundColor: isSwitchingChain ? '#555' : accentClr, color: accentClr === '#00D26A' ? '#000' : '#fff', boxShadow: `0 4px 22px ${accentClr}45` }}>
+                          {isSwitchingChain ? 'Switching to Polygon…' : chainId !== polygon.id ? `Switch to Polygon & Buy` : `Buy ${selectedOutcome} · ${(boundedPrice * 100).toFixed(1)}¢`}
                         </button>
                       )}
                     </>
