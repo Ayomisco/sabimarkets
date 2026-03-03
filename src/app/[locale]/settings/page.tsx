@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Bell, Globe, Palette, Shield, Wallet, 
   ChevronRight, Moon, Sun, Monitor, Check,
@@ -64,6 +64,58 @@ export default function SettingsPage() {
   const [publicProfile, setPublicProfile] = useState(false);
   const [compactMode, setCompactMode] = useState(false);
   const [showVolume, setShowVolume] = useState(true);
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('sabimarket_settings');
+    if (saved) {
+      try {
+        const settings = JSON.parse(saved);
+        if (settings.theme) setTheme(settings.theme);
+        if (settings.currency) setCurrency(settings.currency);
+        if (settings.priceAlerts !== undefined) setPriceAlerts(settings.priceAlerts);
+        if (settings.marketUpdates !== undefined) setMarketUpdates(settings.marketUpdates);
+        if (settings.resolvedMarkets !== undefined) setResolvedMarkets(settings.resolvedMarkets);
+        if (settings.browserNotifs !== undefined) setBrowserNotifs(settings.browserNotifs);
+        if (settings.emailNotifs !== undefined) setEmailNotifs(settings.emailNotifs);
+        if (settings.confirmTrades !== undefined) setConfirmTrades(settings.confirmTrades);
+        if (settings.slippageWarning !== undefined) setSlippageWarning(settings.slippageWarning);
+        if (settings.defaultAmount) setDefaultAmount(settings.defaultAmount);
+        if (settings.hideBalance !== undefined) setHideBalance(settings.hideBalance);
+        if (settings.publicProfile !== undefined) setPublicProfile(settings.publicProfile);
+        if (settings.compactMode !== undefined) setCompactMode(settings.compactMode);
+        if (settings.showVolume !== undefined) setShowVolume(settings.showVolume);
+      } catch (e) {
+        console.error('Failed to load settings:', e);
+      }
+    }
+  }, []);
+
+  // Save settings to localStorage whenever they change
+  useEffect(() => {
+    const settings = {
+      theme, currency, priceAlerts, marketUpdates, resolvedMarkets,
+      browserNotifs, emailNotifs, confirmTrades, slippageWarning,
+      defaultAmount, hideBalance, publicProfile, compactMode, showVolume
+    };
+    localStorage.setItem('sabimarket_settings', JSON.stringify(settings));
+  }, [theme, currency, priceAlerts, marketUpdates, resolvedMarkets, browserNotifs, 
+      emailNotifs, confirmTrades, slippageWarning, defaultAmount, hideBalance, 
+      publicProfile, compactMode, showVolume]);
+
+  // Apply theme to root element
+  useEffect(() => {
+    const root = document.documentElement;
+    
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.toggle('dark', systemTheme === 'dark');
+      root.classList.toggle('light', systemTheme === 'light');
+    } else {
+      root.classList.toggle('dark', theme === 'dark');
+      root.classList.toggle('light', theme === 'light');
+    }
+  }, [theme]);
 
   function shortenAddress(addr: string) {
     return addr.slice(0, 8) + '···' + addr.slice(-6);
@@ -293,10 +345,10 @@ export default function SettingsPage() {
               </SettingsRow>
               <div className="mt-6 p-4 bg-[#00D26A]/5 border border-[#00D26A]/15 rounded-xl">
                 <p className="text-[12px] text-[#00D26A] font-semibold mb-1 flex items-center gap-1.5">
-                  <Zap size={12} fill="#00D26A" /> Demo Mode Active
+                  <Zap size={12} fill="#00D26A" /> Live Trading Active
                 </p>
                 <p className="text-[12px] text-[#7A7068]">
-                  All orders are currently simulated on Polygon. Real money trading via CTF Proxy Wallet coming after Builder Grant approval.
+                  All orders are executed on Polygon via Polymarket's CLOB. Your trades are real and your funds are managed non-custodially through your wallet.
                 </p>
               </div>
             </Section>
