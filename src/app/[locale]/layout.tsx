@@ -26,9 +26,9 @@ export const metadata: Metadata = {
     description: 'Africa\'s first decentralised prediction market. Bet on real-world events — powered by Polymarket.',
     images: [
       {
-        url: '/logo.svg',
+        url: '/sabimarket-logo.png',
         width: 500,
-        height: 120,
+        height: 500,
         alt: 'SabiMarket Logo',
       }
     ],
@@ -37,13 +37,13 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'SabiMarket — Africa\'s Native Prediction Market',
     description: 'Africa\'s first decentralised prediction market. Bet on real-world events.',
-    images: ['/logo.svg'],
+    images: ['/sabimarket-logo.png'],
     creator: '@sabimarket',
   },
   icons: {
-    icon: '/logo-icon.svg',
-    shortcut: '/logo-icon.svg',
-    apple: '/logo-icon.svg',
+    icon: '/sabimarket-logo.png',
+    shortcut: '/sabimarket-logo.png',
+    apple: '/sabimarket-logo.png',
   },
   manifest: '/site.webmanifest',
 };

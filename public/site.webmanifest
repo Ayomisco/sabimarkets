@@ -8,7 +8,7 @@
   "theme_color": "#00D26A",
   "icons": [
     {
-      "src": "/logo-icon.svg",
+      "src": "/sabimarket-logo.png",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
