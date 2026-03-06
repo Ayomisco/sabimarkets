@@ -218,9 +218,22 @@ export function BetModal({
 
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      const msg = errorMessage.includes('rejected')
-        ? 'You rejected the signature — no order was placed.'
-        : errorMessage || 'Something went wrong.';
+      
+      // User-friendly error messages
+      let msg = 'Something went wrong. Please try again.';
+      
+      if (errorMessage.includes('rejected') || errorMessage.includes('User rejected')) {
+        msg = 'You rejected the signature — no order was placed.';
+      } else if (errorMessage.includes('insufficient balance')) {
+        msg = 'Insufficient USDC balance.';
+      } else if (errorMessage.includes('temporarily unavailable')) {
+        msg = 'Trading is temporarily unavailable. Please try again in a few minutes.';
+      } else if (errorMessage.includes('contact support')) {
+        msg = 'Unable to connect to trading service. Please contact support if this persists.';
+      } else if (errorMessage !== 'Unknown error') {
+        msg = errorMessage;
+      }
+      
       setTxError(msg);
       setStep('error');
       toastError('Order failed', msg);
