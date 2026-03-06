@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     template: '%s | SabiMarket',
   },
   description: 'SabiMarket is Africa\'s first decentralised prediction market. Bet on real-world events across politics, sports, economy, and more — powered by Polymarket and built for Africa.',
-  keywords: ['prediction market', 'africa', 'polymarket', 'crypto', 'betting', 'nigeria', 'kenya', 'ghana', 'defi', 'web3', 'sabimarket'],
+  keywords: ['prediction market', 'africa', 'polymarket', 'crypto', 'betting', 'nigeria', 'kenya', 'ghana', 'defi', 'web3','prediction', 'sabimarket'],
   authors: [{ name: 'SabiMarket', url: 'https://sabimarket.xyz' }],
   creator: 'SabiMarket',
   metadataBase: new URL('https://sabimarket.xyz'),
