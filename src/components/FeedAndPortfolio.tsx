@@ -108,7 +108,7 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
                 <Wallet size={28} className="text-[#7A7068]" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Connect Your Wallet</h3>
-              <p className="text-sm text-[#7A7068] max-w-xs mb-6">See your real on-chain positions, P&amp;L, and trading history from Polymarket</p>
+              <p className="text-sm text-[#7A7068] max-w-xs mb-6">See your real on-chain positions, P&amp;L, and trading history on SabiMarkets</p>
               <div className="flex flex-col gap-3 items-center">
                 <button
                   onClick={() => openConnectModal?.()}
@@ -173,12 +173,12 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
           {loadingPortfolio ? (
             <div className="flex flex-col items-center justify-center py-24 text-[#7A7068]">
               <Loader2 size={32} className="animate-spin mb-4" />
-              <p className="text-sm">Fetching positions from Polygon…</p>
+              <p className="text-sm">Fetching positions from Flow EVM…</p>
             </div>
           ) : portfolioSubTab === 'history' ? (
             <EmptyState icon={Clock} title="No Trade History Yet" desc="Completed trades will appear here." />
           ) : positions.length === 0 ? (
-            <EmptyState icon={BarChart2} title="No Active Positions" desc="You don't have any open positions on Polymarket yet.">
+            <EmptyState icon={BarChart2} title="No Active Positions" desc="You don't have any open positions yet.">
               <button onClick={() => setActiveTab('markets')}
                 className="cursor-pointer bg-[#00D26A] text-black px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#00B85E] transition-colors mt-4">
                 Explore Markets →
@@ -262,7 +262,7 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
                     <div><p className="text-[#7A7068] text-[10px] uppercase mb-1 font-medium">YES Probability</p>
                          <p className="text-lg font-bold text-[#00D26A] font-mono">{Math.round(heroYesPrice * 100)}%</p></div>
                     <div><p className="text-[#7A7068] text-[10px] uppercase mb-1 font-medium">Source</p>
-                         <p className="text-lg font-bold text-white font-mono">Polymarket</p></div>
+                         <p className="text-lg font-bold text-white font-mono">SabiMarkets</p></div>
                   </div>
                   <div className="flex items-center gap-2 sm:gap-3">
                     <button onClick={() => handleHeroBet('YES')}
@@ -290,7 +290,7 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
                     </div>
                   </div>
                   <div className="flex-1 min-h-[220px] relative">
-                    <MarketChart currentYesPrice={heroYesPrice} yesTokenId={heroMarket?.tokens?.[0]?.token_id} />
+                    <MarketChart currentYesPrice={heroYesPrice} />
                   </div>
                 </div>
               </div>

@@ -3,19 +3,17 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Market } from '@/lib/polymarket/types';
 import { Share2, BookmarkPlus, ExternalLink, TrendingUp, Clock, X, Zap, Wallet } from 'lucide-react';
-import { useMarketStore } from "@/store/marketStore";
 import MarketChart from './MarketChart';
 import CommentSection from './CommentSection';
 import { useToast } from './Toast';
-import { useAccount, useReadContract, useChainId, useSwitchChain } from 'wagmi';
-import { polygon } from 'wagmi/chains';
+import { useAccount, useReadContract } from 'wagmi';
 import { formatUnits } from 'viem';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { CONTRACTS, USDC_ABI, flowTestnet } from '@/lib/contracts';
 
 import { useState, useEffect } from 'react';
 
-const USDC_ADDRESS = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174';
-const USDC_ABI = [
+const USDC_ABI_LOCAL = [
   { name: 'balanceOf', type: 'function', stateMutability: 'view', inputs: [{ name: 'account', type: 'address' }], outputs: [{ type: 'uint256' }] },
 ] as const;
 
@@ -30,16 +28,12 @@ export function MarketDetailModal({
   market: Market | null;
   onBet?: (outcome: string, price: number) => void;
 }) {
-  const { livePrices } = useMarketStore();
   const { address } = useAccount();
-  const chainId = useChainId();
-  const { switchChainAsync } = useSwitchChain();
   const { error: toastError, warning: toastWarning, success: toastSuccess } = useToast();
   const { trackView, trackOrder } = useAnalytics();
 
   const [selectedOutcome, setSelectedOutcome] = useState<string>("YES");
   const [orderAmount, setOrderAmount] = useState<number | string>(10);
-  const [isSwitchingChain, setIsSwitchingChain] = useState(false);
 
   // Track market view when modal opens
   useEffect(() => {
@@ -48,13 +42,13 @@ export function MarketDetailModal({
     }
   }, [isOpen, market?.condition_id]);
 
-  // Read USDC balance — force Polygon RPC regardless of wallet's current chain
+  // Read USDC balance on Flow EVM
   const { data: usdcBalance } = useReadContract({
-    address: USDC_ADDRESS,
-    abi: USDC_ABI,
+    address: CONTRACTS.USDC,
+    abi: USDC_ABI_LOCAL,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
-    chainId: polygon.id,
+    chainId: flowTestnet.id,
   });
 
   if (!market) return null;
@@ -78,10 +72,7 @@ export function MarketDetailModal({
     ? new Date(market.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : "Open";
 
-  const yesTokenId = market.tokens?.[0]?.token_id;
-  const currentYesPrice = yesTokenId && livePrices[yesTokenId] !== undefined
-    ? livePrices[yesTokenId]
-    : parseFloat(outcomePrices[0] || "0.5");
+  const currentYesPrice = parseFloat(outcomePrices[0] || "0.5");
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -112,14 +103,14 @@ export function MarketDetailModal({
             <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#7A7068]">
               <span className="flex items-center gap-1"><TrendingUp size={11} />${stringVol} Vol.</span>
               <span className="flex items-center gap-1"><Clock size={11} />Closes {closeDate}</span>
-              <span className="flex items-center gap-1 text-[#00D26A]"><Zap size={10} fill="#00D26A" />Polymarket</span>
+              <span className="flex items-center gap-1 text-[#00D26A]"><Zap size={10} fill="#00D26A" />Flow EVM</span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <a href={`https://polymarket.com/event/${market.slug || market.condition_id}`}
+            <a href={`https://evm-testnet.flowscan.io/address/${market.id}`}
                target="_blank" rel="noopener noreferrer"
                className="hidden sm:flex cursor-pointer items-center gap-1.5 px-2.5 py-1.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[11px] text-[#7A7068] hover:text-white transition-colors">
-              <ExternalLink size={12} /> Polymarket
+              <ExternalLink size={12} /> FlowScan
             </a>
             <button className="cursor-pointer p-2 bg-white/[0.04] border border-white/[0.07] rounded-lg text-[#7A7068] hover:text-white transition-colors hidden sm:flex">
               <Share2 size={13} />
@@ -159,7 +150,7 @@ export function MarketDetailModal({
                     <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#FF4560]" />NO</span>
                   </div>
                 </div>
-                <MarketChart currentYesPrice={currentYesPrice} yesTokenId={yesTokenId} />
+                <MarketChart currentYesPrice={currentYesPrice} />
               </div>
 
               {/* Outcomes */}
@@ -167,8 +158,7 @@ export function MarketDetailModal({
                 <p className="text-[10px] font-semibold text-[#7A7068] uppercase tracking-widest mb-2">Outcomes</p>
                 <div className="space-y-2">
                   {outcomes.map((name: string, i: number) => {
-                    const tId = market.tokens?.[i]?.token_id;
-                    const price = tId && livePrices[tId] !== undefined ? livePrices[tId] : parseFloat(outcomePrices[i] || "0.5");
+                    const price = parseFloat(outcomePrices[i] || "0.5");
                     // Format percentage: show decimal for values < 1%
                     const pct = price * 100;
                     const pctDisplay = pct < 1 && pct > 0 ? pct.toFixed(1) : Math.round(pct).toString();
@@ -223,8 +213,7 @@ export function MarketDetailModal({
                 {/* Outcome buttons - dynamic grid based on count */}
                 <div className={`grid gap-2 mb-4 ${isMultiOutcome ? 'grid-cols-1' : 'grid-cols-2'}`}>
                   {outcomes.map((name: string, i: number) => {
-                    const tId = market.tokens?.[i]?.token_id;
-                    const price = tId && livePrices[tId] !== undefined ? livePrices[tId] : parseFloat(outcomePrices[i] || "0.5");
+                    const price = parseFloat(outcomePrices[i] || "0.5");
                     const pct = price * 100;
                     const pctDisplay = pct < 1 && pct > 0 ? pct.toFixed(1) : Math.round(pct).toString();
                     const isSelected = selectedOutcome === name;
@@ -296,8 +285,7 @@ export function MarketDetailModal({
                 {/* Order summary */}
                 {(() => {
                   const selIdx = outcomes.indexOf(selectedOutcome) >= 0 ? outcomes.indexOf(selectedOutcome) : 0;
-                  const selTid = market.tokens?.[selIdx]?.token_id;
-                  const selPrice = selTid && livePrices[selTid] !== undefined ? livePrices[selTid] : parseFloat(outcomePrices[selIdx] || '0.5');
+                  const selPrice = parseFloat(outcomePrices[selIdx] || '0.5');
                   const boundedPrice = Math.max(0.01, Math.min(0.99, selPrice));
                   const shares = boundedPrice > 0 ? (validAmount / boundedPrice).toFixed(1) : '0.0';
                   const profit = parseFloat(shares) - validAmount;
@@ -334,26 +322,10 @@ export function MarketDetailModal({
                         </button>
                       ) : (
                         <button
-                          disabled={validAmount <= 0 || !hasEnoughUsdc || isSwitchingChain}
+                          disabled={validAmount <= 0 || !hasEnoughUsdc}
                           onClick={async () => {
-                            const tid = market.tokens?.[selIdx]?.token_id;
-                            if (!tid) { toastError('Market error', 'No token ID found for this outcome'); return; }
                             if (validAmount <= 0) { toastWarning('Invalid amount', 'Enter an amount greater than 0'); return; }
                             if (!hasEnoughUsdc) { toastError('Insufficient USDC', `You need $${validAmount} USDC`); return; }
-                            // Auto-switch to Polygon if on wrong chain
-                            if (chainId !== polygon.id) {
-                              try {
-                                setIsSwitchingChain(true);
-                                await switchChainAsync({ chainId: polygon.id });
-                                toastSuccess('Network switched', 'Now on Polygon — placing your order…');
-                              } catch {
-                                toastError('Switch failed', 'Please switch to Polygon in your wallet and try again');
-                                setIsSwitchingChain(false);
-                                return;
-                              } finally {
-                                setIsSwitchingChain(false);
-                              }
-                            }
                             // Track order
                             if (address) {
                               await trackOrder(
@@ -369,8 +341,8 @@ export function MarketDetailModal({
                             if (onBet) { onBet(selectedOutcome, boundedPrice); onClose(); }
                           }}
                           className="cursor-pointer w-full py-3.5 rounded-xl font-bold text-[14px] transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                          style={{ backgroundColor: isSwitchingChain ? '#555' : accentClr, color: accentClr === '#00D26A' ? '#000' : '#fff', boxShadow: `0 4px 22px ${accentClr}45` }}>
-                          {isSwitchingChain ? 'Switching to Polygon…' : chainId !== polygon.id ? `Switch to Polygon & Buy` : `Buy ${selectedOutcome} · ${(boundedPrice * 100).toFixed(1)}¢`}
+                          style={{ backgroundColor: accentClr, color: accentClr === '#00D26A' ? '#000' : '#fff', boxShadow: `0 4px 22px ${accentClr}45` }}>
+                          {`Buy ${selectedOutcome} · ${(boundedPrice * 100).toFixed(1)}¢`}
                         </button>
                       )}
                     </>
@@ -379,10 +351,10 @@ export function MarketDetailModal({
 
                 {/* Links row */}
                 <div className="flex items-center justify-center gap-3 mt-4">
-                  <a href={`https://polymarket.com/event/${market.slug || market.condition_id}`}
+                  <a href={`https://evm-testnet.flowscan.io/address/${market.id}`}
                      target="_blank" rel="noopener noreferrer"
                      className="cursor-pointer flex items-center gap-1 text-[11px] text-[#7A7068] hover:text-white transition-colors">
-                    <ExternalLink size={11} /> View on Polymarket
+                    <ExternalLink size={11} /> View on FlowScan
                   </a>
                   <span className="text-white/20">|</span>
                   <button className="cursor-pointer flex items-center gap-1 text-[11px] text-[#7A7068] hover:text-white transition-colors">

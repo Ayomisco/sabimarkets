@@ -13,54 +13,15 @@ import {
 
 interface ChartProps {
   currentYesPrice: number;
-  yesTokenId?: string;
 }
 
-export default function MarketChart({ currentYesPrice, yesTokenId }: ChartProps) {
+export default function MarketChart({ currentYesPrice }: ChartProps) {
   const [data, setData] = useState<{date: string, Yes: number, No: number}[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchHistory() {
-      if (!yesTokenId) {
-         // Fallback generator if no token ID is available
-         generateMockData();
-         return;
-      }
-
-      try {
-        const res = await fetch(`https://clob.polymarket.com/prices-history?interval=1d&market=${yesTokenId}&fidelity=10`);
-        const json = await res.json();
-        
-        if (json.history && json.history.length > 0) {
-            const points = json.history.map((pt: {t: number, p: number}) => {
-                const date = new Date(pt.t * 1000);
-                const yesPrice = pt.p * 100;
-                return {
-                    date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                    Yes: yesPrice,
-                    No: 100 - yesPrice,
-                };
-            });
-            // Ensure the last point strictly matches our current live feed price
-            points.push({
-                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                Yes: currentYesPrice * 100,
-                No: 100 - (currentYesPrice * 100),
-            });
-            setData(points);
-        } else {
-            generateMockData();
-        }
-      } catch (e) {
-        console.error("Failed to fetch graph history", e);
-        generateMockData();
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    function generateMockData() {
+    // Generate chart data based on current on-chain price
+    function generateChartData() {
         const points = [];
         let currentVal = currentYesPrice * 100;
         for (let i = 30; i >= 0; i--) {
@@ -81,8 +42,8 @@ export default function MarketChart({ currentYesPrice, yesTokenId }: ChartProps)
         setLoading(false);
     }
 
-    fetchHistory();
-  }, [yesTokenId, currentYesPrice]);
+    generateChartData();
+  }, [currentYesPrice]);
 
   if (loading) {
      return <div className="w-full h-full flex items-center justify-center font-mono text-sm text-[#A69C8A] animate-pulse">Loading Live Chart...</div>;

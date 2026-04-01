@@ -10,7 +10,6 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@polymarket/clob-client": "^5.2.4",
     "@prisma/client": "^5.22.0",
     "@rainbow-me/rainbowkit": "^2.2.10",
     "@sentry/nextjs": "^10.40.0",

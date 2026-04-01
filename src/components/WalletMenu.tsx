@@ -48,8 +48,8 @@ export function WalletMenu() {
     }
   };
 
-  const handleViewOnPolygon = () => {
-    if (address) window.open(`https://polygonscan.com/address/${address}`, '_blank');
+  const handleViewOnExplorer = () => {
+    if (address) window.open(`https://evm-testnet.flowscan.io/address/${address}`, '_blank');
   };
 
   if (!mounted) {
@@ -109,7 +109,7 @@ export function WalletMenu() {
                 <p className="font-semibold text-white text-[14px] truncate">{short}</p>
                 <p className="text-[11px] text-[#7A7068] flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#00D26A] animate-pulse inline-block" />
-                  Connected · Polygon
+                  Connected · Flow EVM
                 </p>
               </div>
             </div>
@@ -136,8 +136,8 @@ export function WalletMenu() {
             />
             <MenuItem 
               icon={ExternalLink} 
-              label="View on Polygon Scan" 
-              onClick={handleViewOnPolygon} 
+              label="View on FlowScan" 
+              onClick={handleViewOnExplorer} 
             />
             <MenuItem 
               icon={TrendingUp} 

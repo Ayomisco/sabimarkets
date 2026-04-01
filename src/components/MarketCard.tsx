@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { Market } from "@/lib/polymarket/types";
-import { useMarketStore } from "@/store/marketStore";
 import { TrendingUp, ArrowUpRight } from "lucide-react";
 
 interface MarketCardProps {
@@ -13,8 +12,6 @@ interface MarketCardProps {
 }
 
 export function MarketCard({ market, index, onMarketClick, onBetClick }: MarketCardProps) {
-  const { livePrices } = useMarketStore();
-  
   const volUSDC = parseInt(market.volume || "0");
   const stringVol = volUSDC >= 1000000 
     ? (volUSDC / 1000000).toFixed(1) + 'M' 
@@ -22,15 +19,8 @@ export function MarketCard({ market, index, onMarketClick, onBetClick }: MarketC
     ? (volUSDC / 1000).toFixed(1) + 'K' 
     : volUSDC.toString();
   
-  const yesAssetId = market.tokens?.[0]?.token_id;
-  const noAssetId = market.tokens?.[1]?.token_id;
-  
-  const rawYesPrice = yesAssetId && livePrices[yesAssetId] !== undefined 
-    ? livePrices[yesAssetId] 
-    : parseFloat(market.outcomePrices?.[0] || "0.5");
-  const rawNoPrice = noAssetId && livePrices[noAssetId] !== undefined 
-    ? livePrices[noAssetId] 
-    : parseFloat(market.outcomePrices?.[1] || "0.5");
+  const rawYesPrice = parseFloat(market.outcomePrices?.[0] || "0.5");
+  const rawNoPrice = parseFloat(market.outcomePrices?.[1] || "0.5");
 
   // Format percentages: show decimal for values < 1%
   const formatPercent = (price: number) => {
@@ -146,9 +136,9 @@ export function MarketCard({ market, index, onMarketClick, onBetClick }: MarketC
         </div>
         <div className="flex items-center gap-1">
           <div className="w-3.5 h-3.5 rounded-full bg-[#1A1511] border border-white/10 flex items-center justify-center">
-            <span className="text-[7px] text-[#7A7068] font-bold">P</span>
+            <span className="text-[7px] text-[#7A7068] font-bold">S</span>
           </div>
-          <span className="text-[10px] text-[#7A7068]">Polymarket</span>
+          <span className="text-[10px] text-[#7A7068]">Flow EVM</span>
         </div>
       </div>
     </motion.div>

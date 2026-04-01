@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useMarketStore } from "@/store/marketStore";
-import { usePolymarketWSS } from "@/hooks/usePolymarketWSS";
+import { useState } from "react";
 import { MarketCard } from "./MarketCard";
 import { Market } from "@/lib/polymarket/types";
 import { BetModal } from "./BetModal";
@@ -10,7 +8,6 @@ import { MarketDetailModal } from "./MarketDetailModal";
 import { Flame, Globe, Bitcoin, Landmark, Trophy, TrendingUp, Clapperboard } from "lucide-react";
 
 export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiCategory: string })[] }) {
-    const { setSubscribeTokens } = useMarketStore();
     const [selectedCategory, setSelectedCategory] = useState<string>("All");
     
     const [isDetailModalOpen, setDetailModalOpen] = useState(false);
@@ -18,20 +15,6 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
     const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
     const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null);
     const [selectedPrice, setSelectedPrice] = useState<number>(0);
-
-    usePolymarketWSS();
-
-    useEffect(() => {
-        const tokensToWatch: string[] = [];
-        initialMarkets.forEach(market => {
-            if (market.tokens && Array.isArray(market.tokens)) {
-                market.tokens.forEach(token => {
-                   if(token.token_id) tokensToWatch.push(token.token_id);
-                });
-            }
-        });
-        if (tokensToWatch.length > 0) setSubscribeTokens(tokensToWatch);
-    }, [initialMarkets, setSubscribeTokens]);
 
     const categories = [
         { name: "All", icon: <Flame size={13} /> },
@@ -98,7 +81,7 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredMarkets.length > 0 ? filteredMarkets.map((market, i) => (
                     <MarketCard 
-                        key={market.condition_id || i} 
+                        key={market.id || i} 
                         market={market} 
                         index={i} 
                         onMarketClick={handleMarketClick}

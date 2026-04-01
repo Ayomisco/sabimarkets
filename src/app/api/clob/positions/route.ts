@@ -1,64 +1,110 @@
 /**
  * GET /api/clob/positions?address=0x...
- * Fetches real on-chain positions for a user from Polymarket Gamma API.
- * Replaces localStorage simulation.
+ * Reads on-chain positions from SabiMarket contracts on Flow EVM.
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { createPublicClient, http, getAddress } from 'viem';
+import { CONTRACTS, FACTORY_ABI, MARKET_ABI, flowTestnet } from '@/lib/contracts';
 
-export const preferredRegion = 'fra1'; // Force Frankfurt, Germany (Bypasses Polymarket US Geoblock)
-
-const GAMMA_API = 'https://gamma-api.polymarket.com';
+const client = createPublicClient({
+  chain: flowTestnet,
+  transport: http(),
+});
 
 export async function GET(req: NextRequest) {
   const address = req.nextUrl.searchParams.get('address');
   if (!address) return NextResponse.json({ error: 'address required' }, { status: 400 });
 
   try {
-    // Fetch real positions
-    const [posRes, tradeRes] = await Promise.all([
-      fetch(`${GAMMA_API}/positions?user=${address}&sizeThreshold=0.01`, {
-        next: { revalidate: 30 },
-      }),
-      fetch(`${GAMMA_API}/trades?user=${address}&limit=50`, {
-        next: { revalidate: 30 },
-      }),
-    ]);
+    const userAddr = getAddress(address);
 
-    if (!posRes.ok) {
-      return NextResponse.json({ positions: [], trades: [] });
-    }
+    const count = await client.readContract({
+      address: CONTRACTS.FACTORY as `0x${string}`,
+      abi: FACTORY_ABI,
+      functionName: 'getMarketCount',
+    }) as bigint;
 
-    const positions = await posRes.json();
-    const trades = tradeRes.ok ? await tradeRes.json() : [];
+    const markets = await client.readContract({
+      address: CONTRACTS.FACTORY as `0x${string}`,
+      abi: FACTORY_ABI,
+      functionName: 'getMarkets',
+      args: [0n, count],
+    }) as `0x${string}`[];
 
-    // Enrich positions with P&L
-    const enriched = (Array.isArray(positions) ? positions : []).map((p: any) => {
-      const currentPrice = parseFloat(p.currentPrice || p.pricePerShare || '0.5');
-      const avgPrice = parseFloat(p.avgPrice || p.averagePrice || '0.5');
-      const shares = parseFloat(p.size || '0');
-      const totalCost = shares * avgPrice;
-      const currentValue = shares * currentPrice;
-      const pnl = currentValue - totalCost;
-      const pnlPct = totalCost > 0 ? ((pnl / totalCost) * 100).toFixed(1) : '0';
+    const enriched: any[] = [];
 
-      return {
-        id: p.id || p.proxyWallet + p.conditionId,
-        marketTitle: p.title || p.market?.question || 'Unknown Market',
-        outcome: p.outcome || (p.side === 0 ? 'YES' : 'NO'),
-        shares,
-        avgPrice,
-        currentPrice,
-        totalCost,
-        currentValue,
-        pnl,
-        pnlPct: parseFloat(pnlPct),
-        conditionId: p.conditionId,
-        tokenId: p.asset || p.tokenId,
-        isWinner: currentPrice > 0.9,
-      };
-    });
+    await Promise.all(
+      markets.map(async (marketAddr) => {
+        try {
+          const [position, info, yesPrice] = await Promise.all([
+            client.readContract({
+              address: marketAddr,
+              abi: MARKET_ABI,
+              functionName: 'getUserPosition',
+              args: [userAddr],
+            }) as Promise<[bigint, bigint, boolean]>,
+            client.readContract({
+              address: marketAddr,
+              abi: MARKET_ABI,
+              functionName: 'getMarketInfo',
+            }) as Promise<[string, string, string, bigint, bigint, bigint, bigint, boolean, number, bigint]>,
+            client.readContract({
+              address: marketAddr,
+              abi: MARKET_ABI,
+              functionName: 'getYesPrice',
+            }) as Promise<bigint>,
+          ]);
 
-    // Portfolio stats
+          const [yesShares, noShares] = position;
+          if (yesShares === 0n && noShares === 0n) return;
+
+          const question = info[0];
+          const currentYesPrice = Number(yesPrice) / 1e6;
+          const currentNoPrice = 1 - currentYesPrice;
+
+          if (yesShares > 0n) {
+            const shares = Number(yesShares) / 1e6;
+            const avgPrice = currentYesPrice;
+            const currentValue = shares * currentYesPrice;
+            enriched.push({
+              id: marketAddr + '-YES',
+              marketTitle: question,
+              outcome: 'YES',
+              shares,
+              avgPrice,
+              currentPrice: currentYesPrice,
+              totalCost: shares * avgPrice,
+              currentValue,
+              pnl: 0,
+              pnlPct: 0,
+              tokenId: marketAddr,
+            });
+          }
+
+          if (noShares > 0n) {
+            const shares = Number(noShares) / 1e6;
+            const avgPrice = currentNoPrice;
+            const currentValue = shares * currentNoPrice;
+            enriched.push({
+              id: marketAddr + '-NO',
+              marketTitle: question,
+              outcome: 'NO',
+              shares,
+              avgPrice,
+              currentPrice: currentNoPrice,
+              totalCost: shares * avgPrice,
+              currentValue,
+              pnl: 0,
+              pnlPct: 0,
+              tokenId: marketAddr,
+            });
+          }
+        } catch {
+          // skip markets that fail
+        }
+      })
+    );
+
     const totalValue = enriched.reduce((s: number, p: any) => s + p.currentValue, 0);
     const totalCost = enriched.reduce((s: number, p: any) => s + p.totalCost, 0);
     const totalPnl = totalValue - totalCost;
@@ -68,11 +114,13 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       positions: enriched,
-      trades: Array.isArray(trades) ? trades.slice(0, 20) : [],
       stats: { totalValue, totalCost, totalPnl, winRate, count: enriched.length },
     });
   } catch (err: any) {
     console.error('[Positions] Error:', err);
-    return NextResponse.json({ positions: [], trades: [], stats: { totalValue: 0, totalCost: 0, totalPnl: 0, winRate: 0, count: 0 } });
+    return NextResponse.json({
+      positions: [],
+      stats: { totalValue: 0, totalCost: 0, totalPnl: 0, winRate: 0, count: 0 },
+    });
   }
 }

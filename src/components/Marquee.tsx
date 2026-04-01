@@ -1,11 +1,8 @@
 "use client";
 
 import { Market } from "@/lib/polymarket/types";
-import { useMarketStore } from "@/store/marketStore";
 
 export default function Marquee({ markets }: { markets: Market[] }) {
-  const { livePrices } = useMarketStore();
-  
   if (!markets || markets.length === 0) return null;
 
   const items = [...markets, ...markets]; // double for seamless loop
@@ -14,10 +11,7 @@ export default function Marquee({ markets }: { markets: Market[] }) {
     <div className="flex w-full whitespace-nowrap overflow-hidden group">
       <div className="animate-marquee flex gap-10 group-hover:[animation-play-state:paused] whitespace-nowrap pl-6">
         {items.map((m, i) => {
-          const tokenId = m.tokens?.[0]?.token_id;
-          const livePrice = tokenId && livePrices[tokenId] !== undefined 
-            ? livePrices[tokenId] 
-            : parseFloat(m.outcomePrices?.[0] || "0.5");
+          const livePrice = parseFloat(m.outcomePrices?.[0] || "0.5");
           const pct = Math.round(livePrice * 100);
           
           // Simulate price change for display
