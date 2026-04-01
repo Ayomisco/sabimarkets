@@ -4,10 +4,16 @@ import { useState, useEffect } from 'react';
 import { Market } from '@/lib/polymarket/types';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { X, Loader2, Zap, ArrowUpRight, ArrowDownRight, AlertTriangle, ExternalLink } from 'lucide-react';
-import { useAccount, useReadContract, useSendTransaction, usePublicClient } from 'wagmi';
+import { useAccount, useReadContract, useSendTransaction } from 'wagmi';
 import { useToast } from '@/components/Toast';
-import { formatUnits, parseUnits, encodeFunctionData } from 'viem';
+import { formatUnits, parseUnits, encodeFunctionData, createPublicClient, http } from 'viem';
 import { CONTRACTS, USDC_ABI, MARKET_ABI, flowTestnet } from '@/lib/contracts';
+
+// Standalone viem client for waitForTransactionReceipt — avoids wagmi chain-resolution issues
+const viemClient = createPublicClient({
+  chain: flowTestnet,
+  transport: http('https://testnet.evm.nodes.onflow.org', { retryCount: 4, retryDelay: 600 }),
+});
 
 export function BetModal({
   isOpen, onClose, market, selectedOutcome: initialOutcome,
@@ -24,7 +30,6 @@ export function BetModal({
   const { success: toastSuccess, error: toastError, warning: toastWarning, info: toastInfo } = useToast();
 
   const { sendTransactionAsync } = useSendTransaction();
-  const publicClient = usePublicClient({ chainId: flowTestnet.id });
 
   // Read USDC balance on Flow EVM — no polling to avoid flooding the rate-limited RPC
   const { data: usdcBalance } = useReadContract({
@@ -127,15 +132,10 @@ export function BetModal({
           to: CONTRACTS.USDC,
           data: approveData,
           gas: BigInt(80_000),
-          chainId: flowTestnet.id,
         });
 
         // Wait for approve tx to be mined before proceeding
-        if (publicClient) {
-          await publicClient.waitForTransactionReceipt({ hash: approveTxHash });
-        } else {
-          await new Promise(resolve => setTimeout(resolve, 4000));
-        }
+        await viemClient.waitForTransactionReceipt({ hash: approveTxHash });
         await refetchAllowance();
       }
 
@@ -152,7 +152,6 @@ export function BetModal({
         to: marketAddress,
         data: buyData,
         gas: BigInt(300_000),
-        chainId: flowTestnet.id,
       });
 
       setStep('done');
