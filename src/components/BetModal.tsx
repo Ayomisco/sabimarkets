@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { Market } from '@/lib/polymarket/types';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { X, Loader2, Zap, ArrowUpRight, ArrowDownRight, AlertTriangle, ExternalLink } from 'lucide-react';
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useReadContract, useSendTransaction } from 'wagmi';
 import { useToast } from '@/components/Toast';
-import { formatUnits, parseUnits } from 'viem';
+import { formatUnits, parseUnits, encodeFunctionData } from 'viem';
 import { CONTRACTS, USDC_ABI, MARKET_ABI, flowTestnet } from '@/lib/contracts';
 
 export function BetModal({
@@ -23,7 +23,7 @@ export function BetModal({
   const { address } = useAccount();
   const { success: toastSuccess, error: toastError, warning: toastWarning, info: toastInfo } = useToast();
 
-  const { writeContractAsync } = useWriteContract();
+  const { sendTransactionAsync } = useSendTransaction();
 
   // Read USDC balance on Flow EVM — no polling to avoid flooding the rate-limited RPC
   const { data: usdcBalance } = useReadContract({
@@ -117,13 +117,16 @@ export function BetModal({
         setStep('approving');
         toastInfo('Approving USDC…', 'Please confirm the approval in your wallet.');
         
-        const approveTx = await writeContractAsync({
-          address: CONTRACTS.USDC,
+        const approveData = encodeFunctionData({
           abi: USDC_ABI,
           functionName: 'approve',
           args: [marketAddress, amountWei],
-          chainId: flowTestnet.id,
+        });
+        await sendTransactionAsync({
+          to: CONTRACTS.USDC,
+          data: approveData,
           gas: BigInt(80_000),
+          chainId: flowTestnet.id,
         });
 
         // Wait briefly for approval to process
@@ -135,13 +138,16 @@ export function BetModal({
       setStep('buying');
       toastInfo('Buying shares…', 'Please confirm the transaction in your wallet.');
 
-      const buyTx = await writeContractAsync({
-        address: marketAddress,
+      const buyData = encodeFunctionData({
         abi: MARKET_ABI,
         functionName: 'buyShares',
         args: [isYes, amountWei],
-        chainId: flowTestnet.id,
+      });
+      await sendTransactionAsync({
+        to: marketAddress,
+        data: buyData,
         gas: BigInt(300_000),
+        chainId: flowTestnet.id,
       });
 
       setStep('done');
