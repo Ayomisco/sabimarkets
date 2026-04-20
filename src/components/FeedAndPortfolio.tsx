@@ -6,8 +6,8 @@ import MarketChart from './MarketChart';
 import { MarketList } from './MarketList';
 import { BetModal } from './BetModal';
 import { MarketDetailModal } from './MarketDetailModal';
-import { useAccount } from 'wagmi';
-import { useConnectModal } from '@rainbow-me/rainbowkit';
+import { CreateMarketCTA } from './CreateMarketCTA';
+import { useWallet } from '@/components/Providers';
 import {
   Activity, Clock, TrendingUp, DollarSign, BarChart2,
   Award, Wallet, Globe, Loader2, Search, X
@@ -36,8 +36,7 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
   const [positions, setPositions] = useState<RealPosition[]>([]);
   const [stats, setStats] = useState<PortfolioStats | null>(null);
   const [loadingPortfolio, setLoadingPortfolio] = useState(false);
-  const { address } = useAccount();
-  const { openConnectModal } = useConnectModal();
+  const { address, connect: openConnectModal } = useWallet();
 
   // Hero modal states
   const [isHeroBetOpen, setHeroBetOpen] = useState(false);
@@ -173,7 +172,7 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
           {loadingPortfolio ? (
             <div className="flex flex-col items-center justify-center py-24 text-[#7A7068]">
               <Loader2 size={32} className="animate-spin mb-4" />
-              <p className="text-sm">Fetching positions from Flow EVM…</p>
+              <p className="text-sm">Fetching positions from Stellar…</p>
             </div>
           ) : portfolioSubTab === 'history' ? (
             <EmptyState icon={Clock} title="No Trade History Yet" desc="Completed trades will appear here." />
@@ -183,6 +182,9 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
                 className="cursor-pointer bg-[#00D26A] text-black px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#00B85E] transition-colors mt-4">
                 Explore Markets →
               </button>
+              <div className="mt-6 w-full max-w-md">
+                <CreateMarketCTA variant="banner" />
+              </div>
             </EmptyState>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -296,6 +298,11 @@ export function FeedAndPortfolio({ heroMarket, feedMarkets, heroYesPrice }: Prop
               </div>
             </div>
           )}
+
+          {/* Create Market CTA Banner */}
+          <div className="mb-6">
+            <CreateMarketCTA variant="banner" />
+          </div>
 
           {/* Search + Feed */}
           <div className="hidden md:flex items-center gap-3 mb-6">

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { useWallet } from '@/components/Providers';
 
 export function useAnalytics() {
   const trackUser = async (walletAddress: string, provider?: string, language?: string, referrer?: string) => {
@@ -83,7 +83,8 @@ export function useAnalytics() {
 
 // Auto-track wallet connection
 export function useTrackWalletConnection() {
-  const { address, isConnected, connector } = useAccount();
+  const { address, isConnected } = useWallet();
+  const connectorName = 'Freighter';
   const { trackUser } = useAnalytics();
 
   useEffect(() => {
@@ -98,7 +99,7 @@ export function useTrackWalletConnection() {
         sessionStorage.setItem('referrer', referrer);
       }
 
-      trackUser(address, connector?.name, language, referrer || undefined);
+      trackUser(address, connectorName, language, referrer || undefined);
     }
-  }, [isConnected, address, connector]);
+  }, [isConnected, address]);
 }

@@ -1,10 +1,11 @@
 import { getTranslations } from 'next-intl/server';
 import { getLocale } from 'next-intl/server';
-import { fetchAfricanMarkets } from '@/lib/polymarket/api';
+import { fetchAfricanMarkets } from '@/lib/stellar/api';
 import { translateMarkets } from '@/lib/translate';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { WalletMenu } from '@/components/WalletMenu';
-import { Search } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
+import Link from 'next/link';
 import Marquee from '@/components/Marquee';
 import { FeedAndPortfolio } from '@/components/FeedAndPortfolio';
 
@@ -69,6 +70,13 @@ export default async function HomePage() {
 
           {/* Right controls */}
           <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/create"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#00D26A] hover:bg-[#00B85E] text-black text-[13px] font-bold rounded-xl transition-all"
+            >
+              <Plus size={14} />
+              <span>Create Market</span>
+            </Link>
             <LanguageSwitcher />
             <WalletMenu />
           </div>

@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useAccount } from 'wagmi';
-import { useConnectModal } from '@rainbow-me/rainbowkit';
+import { useWallet } from '@/components/Providers';
 import { ThumbsUp, ThumbsDown, MessageCircle, Send, Loader2, Wallet } from 'lucide-react';
 import { useToast } from './Toast';
 
@@ -31,7 +30,7 @@ interface CommentSectionProps {
 }
 
 function CommentThread({ comment, marketId, onReply }: { comment: Comment; marketId: string; onReply: (commentId: string) => void }) {
-  const { address } = useAccount();
+  const { address } = useWallet();
   const { success: toastSuccess, error: toastError } = useToast();
   const [showReply, setShowReply] = useState(false);
   const [replyText, setReplyText] = useState('');
@@ -243,8 +242,7 @@ function CommentThread({ comment, marketId, onReply }: { comment: Comment; marke
 }
 
 export default function CommentSection({ marketId }: CommentSectionProps) {
-  const { address } = useAccount();
-  const { openConnectModal } = useConnectModal();
+  const { address, connect } = useWallet();
   const { success: toastSuccess, error: toastError } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
@@ -327,7 +325,7 @@ export default function CommentSection({ marketId }: CommentSectionProps) {
               <p className="text-xs text-[#7A7068]">Connect your wallet to share your thoughts and engage with other traders</p>
             </div>
             <button
-              onClick={() => openConnectModal?.()}
+              onClick={() => connect()}
               className="cursor-pointer bg-[#00D26A] text-black px-5 py-2 rounded-lg text-sm font-bold hover:bg-[#00B85E] transition-colors"
             >
               Connect Wallet

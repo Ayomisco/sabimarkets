@@ -13,6 +13,8 @@
     "@prisma/client": "^5.22.0",
     "@rainbow-me/rainbowkit": "^2.2.10",
     "@sentry/nextjs": "^10.40.0",
+    "@stellar/freighter-api": "^6.0.1",
+    "@stellar/stellar-sdk": "^15.0.1",
     "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-query": "^5.90.21",
     "@vercel/analytics": "^1.6.1",

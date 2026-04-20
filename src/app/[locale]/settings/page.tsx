@@ -7,7 +7,7 @@ import {
   TrendingUp, Volume2, Download, Trash2, Eye, EyeOff,
   Zap, User
 } from 'lucide-react';
-import { useAccount } from 'wagmi';
+import { useWallet } from '@/components/Providers';
 import Link from 'next/link';
 
 type Section = 'profile' | 'display' | 'notifications' | 'language' | 'trading' | 'security' | 'data';
@@ -46,7 +46,7 @@ function SettingsRow({ label, description, children }: { label: string; descript
 }
 
 export default function SettingsPage() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWallet();
   const [activeSection, setActiveSection] = useState<Section>('profile');
   
   // State

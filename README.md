@@ -1,309 +1,171 @@
-# SabiMarkets — Africa's Native Prediction Market on Flow EVM
+# SabiMarkets — Africa's Prediction Market on Stellar
 
-> Decentralized prediction markets natively built for Africa, deployed on Flow blockchain.
+> Decentralized prediction markets built natively for Africa, powered by Stellar Soroban smart contracts.
 
 ---
 
-## 🚀 Live Deployment
+## Live Deployment
 
 | Resource | Link |
 |---|---|
-| **Live App (Testnet)** | https://testnet.sabimarket.xyz |
-| **Factory Contract** | [`0xE7579839f736Be431750DCC8715de34305C71c4E`](https://evm-testnet.flowscan.io/address/0xE7579839f736Be431750DCC8715de34305C71c4E) |
-| **USDC (Test)** | [`0x1b568EaBb15edb5CAd05ac3Ba983e238DE1854B3`](https://evm-testnet.flowscan.io/address/0x1b568EaBb15edb5CAd05ac3Ba983e238DE1854B3) |
-| **Network** | Flow EVM Testnet (Chain ID: 545) |
-| **Markets Deployed** | 33 live prediction markets |
-| **Block Explorer** | https://evm-testnet.flowscan.io |
+| **Live App** | https://testnet.sabimarket.xyz |
+| **Network** | Stellar Testnet |
+| **Explorer** | https://stellar.expert/explorer/testnet |
+| **Wallet** | [Freighter](https://www.freighter.app/) (Stellar browser wallet) |
 
-### Deployed Prediction Markets (Sample)
+### Deployed Contracts (Stellar Testnet)
 
-| # | Market | Category |
-|---|---|---|
-| 1 | Will Nigeria hold presidential elections in 2027? | Politics |
-| 2 | Will South Africa's GDP grow above 2% in 2025? | Economy |
-| 3 | Will the African Continental Free Trade Area hit $1T in trade? | Economy |
-| 4 | Will Bitcoin reach $150,000 by December 2025? | Crypto |
-| 5 | Will Kenya's tech ecosystem surpass South Africa by 2026? | Technology |
-| 6 | Will the AFCON 2025 final be watched by 500M+ people? | Sports |
-| 7 | Will Ethiopia's economy grow by 10%+ in 2025? | Economy |
-| 8 | Will West Africa launch a unified currency by 2027? | Politics |
-| + 25 more | Africa politics, sports, economy, crypto markets | Various |
-
-> All markets are live on-chain. Use the faucet at the USDC contract to get test tokens before trading.
+| Contract | Address |
+|---|---|
+| **MockUSDC** | `CDDEX6FS3GISJG366H7RRP432UZ6P3QBDWFFF6RBQE3D7F6KQ4SNFSWC` |
+| **SabiMarketFactory** | `CDGM6NNJGNSI36L32A4NDVVJXMU4CPDNYERPR6F44SPRWCAMOGHE6OHP` |
+| **CLOBExchange** | `CBCCF22KDF6UMKX6QCKNQ6LE4ROEOIAZEHO7ZJKUANKN6FF5MLWXUJ6O` |
+| **OracleResolver** | `CCZCR627NOPJGWSQ7W7SRFM5YXTUCJ4MLUEKFZJXHTEIAZWYXROHHZK2` |
 
 ---
 
 ## What is SabiMarkets?
 
-**SabiMarkets** is a fully on-chain decentralized prediction market built natively for Africa, deployed on the **Flow EVM blockchain**. Users connect their wallets, browse real African and global prediction markets, and trade YES/NO binary outcome shares using USDC — all on-chain, with no intermediaries.
+**SabiMarkets** is a fully on-chain decentralized prediction market built natively for Africa on the **Stellar blockchain**. Users connect their Freighter wallets, browse real African and global prediction markets, and trade YES/NO binary outcome shares using USDC — entirely on-chain, with no intermediaries.
 
-Unlike traditional prediction markets that geo-block African users or lack culturally relevant markets, SabiMarkets is:
+SabiMarkets is:
 
 - **Africa-first** — Markets curated around African politics, economics, sports, and culture
-- **Multilingual** — Supports 15 African languages out of the box
-- **Truly on-chain** — Every trade is a direct smart contract call using wagmi `writeContract`
-- **Own contracts** — Full custom smart contract stack: `SabiMarketFactory` + `SabiMarket` + `MockUSDC`
-- **Low cost** — Runs on Flow EVM, a high-performance EVM-compatible chain with near-zero fees
+- **Multilingual** — 16 African and global languages supported out of the box
+- **Truly on-chain** — Every trade is a direct Soroban contract invocation via Freighter
+- **CLOB-ready** — Central Limit Order Book exchange for advanced order matching
+- **Oracle-agnostic** — Flexible resolution: Optimistic, Direct, AI commit-reveal, or MultiSig
+- **Low cost** — Stellar's native fee model keeps transactions near-zero
 
 ---
 
-## 🏆 Hackathon Submission — PL_Genesis: Frontiers of Collaboration
+## Features
 
-**Tracks:**
-- **Consumer DeFi Track** — On-chain prediction markets with direct contract interaction
-- **Existing Code Track** — Significant refactor and extension of existing prediction market codebase
-- **Crypto Track** — Flow EVM infrastructure + Solidity smart contracts
-
-**Key Technical Achievements:**
-- Complete removal of all Polymarket/Polygon dependencies
-- Custom Solidity smart contracts (AMM-style binary outcome markets)
-- 33 markets deployed on Flow EVM Testnet with live liquidity
-- wagmi v2 + viem for on-chain reads and writes
-- Server-side market data fetching via viem `createPublicClient`
-- On-chain portfolio positions reader (no off-chain indexer needed)
-
----
-
-## ✨ Features
-
-- **33 Live Markets** — Real on-chain African and global prediction markets
-- **15 Languages** — English, French, Arabic, Hausa, Yoruba, Igbo, Swahili, Amharic, Pidgin, Kinyarwanda, Somali, Portuguese, Twi, Xhosa, Zulu
-- **On-Chain Trading** — Direct `buyShares()` / `sellShares()` via smart contracts
-- **USDC Collateral** — ERC-20 based collateral with on-chain allowance management
-- **Real-Time Charts** — Price probability charts with animated transitions
-- **Portfolio Tracker** — On-chain position reader (YES/NO shares per market)
+- **Live Prediction Markets** — On-chain African and global markets
+- **16 Languages** — English, French, Arabic, Hausa, Yoruba, Igbo, Swahili, Amharic, Nigerian Pidgin, Kinyarwanda, Somali, Portuguese, Twi, Xhosa, Zulu, Luganda
+- **On-Chain Trading** — Direct `buy_shares` / `sell_shares` via Soroban contracts through Freighter
+- **USDC Collateral** — Stellar-native USDC with on-chain allowance
+- **CLOB Exchange** — Polymarket CTF-inspired operator-gated order matching (Normal / Mint / Merge)
+- **Multi-Path Resolution** — Optimistic (1h challenge window), Direct, AI commit-reveal, MultiSig
+- **Market Creation** — Permissionless market creation via the factory contract
+- **Real-Time Charts** — Live probability charts with animated transitions
+- **Portfolio Tracker** — On-chain positions reader (YES/NO shares per market)
+- **Comment System** — Threaded market discussions (PostgreSQL)
 - **Admin Dashboard** — Market moderation and user management
-- **Comment System** — Threaded market discussions with PostgreSQL persistence
 - **Analytics** — User activity tracking and market view analytics
-- **Mobile Responsive** — Optimized for all screen sizes
-- **Faucet** — Test USDC freely mintable for testnet use
+- **Faucet** — 10,000 test USDC mintable per address
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
-### Smart Contracts (`/smartcontracts`)
+### Smart Contracts (`/smartcontract-stellar`)
+
+Five Soroban contracts on Stellar Testnet:
 
 ```
 contracts/
-├── MockUSDC.sol          # ERC-20 test token (6 decimals, faucet())
-├── SabiMarket.sol        # Individual prediction market (AMM binary outcomes)
-└── SabiMarketFactory.sol # Market registry + factory
+├── mock-usdc/          # SAC-compatible test USDC (6 decimals, faucet)
+├── sabimarket/         # Binary prediction market (AMM pricing, 1% fee)
+├── sabimarket-factory/ # Market registry (by category, creator)
+├── clob-exchange/      # CLOB order matching (Normal/Mint/Merge)
+└── oracle-resolver/    # Multi-path oracle resolution
 ```
 
-**SabiMarket.sol** — Each deployed market contract handles:
-- `buyShares(bool isYes, uint256 usdcAmount)` — Purchase YES or NO shares
-- `sellShares(bool isYes, uint256 shares)` — Sell shares back to AMM pool
-- `resolve(bool yesWon)` — Owner resolves market outcome
-- `claimWinnings()` — Winners claim proportional USDC collateral
-- `getYesPrice()` / `getNoPrice()` — On-chain AMM price oracle (scaled to 1e6)
-- `getMarketInfo()` — Full market state in one call
-- `getUserPosition(address)` — User's YES/NO share balances
+See [smartcontract-stellar/README.md](../smartcontract-stellar/README.md) for full contract API reference.
 
-**SabiMarketFactory.sol** — Registry with:
-- `createMarket(question, category, imageUri, endTime)` — Deploy new market
-- `getMarkets(offset, limit)` — Paginated market listing
-- `getMarketsByCategory(category)` — Category-filtered markets
-- `getMarketCount()` — Total markets deployed
-
-### Frontend (`/src`)
+### Frontend (`/sabimarkets`)
 
 ```
 src/
-├── lib/
-│   ├── contracts.ts           # Flow EVM chain def, ABIs, contract addresses
-│   └── polymarket/
-│       ├── api.ts             # On-chain market fetcher (viem readContract)
-│       └── types.ts           # Market interface aligned with on-chain data
+├── app/[locale]/
+│   ├── page.tsx          # Homepage (server component, fetches markets from Stellar)
+│   ├── create/           # Market creation flow (5-step wizard)
+│   └── settings/
 ├── components/
-│   ├── BetModal.tsx           # On-chain trade execution (approve + buyShares)
-│   ├── MarketDetailModal.tsx  # Full market view with on-chain prices
-│   ├── MarketCard.tsx         # Market card from on-chain data
-│   ├── MarketList.tsx         # Filterable market grid
-│   ├── MarketChart.tsx        # Price probability chart
-│   ├── FeedAndPortfolio.tsx   # Main feed + on-chain portfolio tab
-│   ├── Marquee.tsx            # Live price ticker
-│   ├── WalletMenu.tsx         # RainbowKit wallet dropdown (Flow EVM)
-│   └── Providers.tsx          # wagmi + RainbowKit providers (Flow EVM)
-├── app/
-│   ├── [locale]/page.tsx      # Server-side market fetch + i18n
-│   └── api/
-│       └── clob/
-│           └── positions/     # On-chain portfolio position reader
+│   ├── FeedAndPortfolio.tsx  # Main feed + portfolio tabs
+│   ├── BetModal.tsx          # Trade modal (Freighter + Soroban invocations)
+│   └── WalletMenu.tsx        # Freighter connect/disconnect/balance
+├── lib/
+│   └── stellar/
+│       ├── contracts.ts      # Contract addresses + XDR specs
+│       ├── client.ts         # SorobanRpc.Server setup
+│       ├── api.ts            # fetchMarkets from factory
+│       └── wallet.ts         # Freighter helpers
 └── store/
-    ├── marketStore.ts         # Zustand market state
-    └── portfolioStore.ts      # Zustand portfolio state
+    ├── marketStore.ts
+    └── portfolioStore.ts
 ```
 
-### Database (`/prisma`)
+### Database (Prisma + PostgreSQL)
 
-PostgreSQL via Neon — stores:
-- User analytics (views, orders, activity)
-- Comments and likes
-- Admin moderation actions
+Off-chain data only — comments, analytics, market curation, user sessions. All financial positions are read directly from Stellar via Soroban RPC.
 
 ---
 
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|---|---|
-| **Frontend** | Next.js 16 (App Router), React 19, TypeScript |
-| **Styling** | Tailwind CSS 4, shadcn/ui, Framer Motion |
-| **Blockchain** | Flow EVM Testnet (Chain ID 545) |
-| **Smart Contracts** | Solidity 0.8.24, OpenZeppelin, Hardhat 2 |
-| **Web3 Client** | wagmi v2, viem, RainbowKit v2 |
-| **State** | Zustand v5 |
-| **i18n** | next-intl (15 languages) |
-| **Database** | PostgreSQL (Neon), Prisma ORM |
-| **Charts** | Recharts |
-| **Deployment** | Vercel (frontend), Flow EVM Testnet (contracts) |
-
----
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- PostgreSQL database (or Neon free tier)
-- WalletConnect Project ID ([cloud.walletconnect.com](https://cloud.walletconnect.com))
+- Node.js 20+
+- [Freighter wallet](https://www.freighter.app/) browser extension
+- PostgreSQL (or Neon serverless)
 
-### 1. Clone & Install
+### Installation
 
 ```bash
-git clone https://github.com/Ayomisco/sabimarkets.git
 cd sabimarkets
 npm install
+cp .env.example .env.local
 ```
 
-### 2. Environment Variables
-
-Create `.env.local` in the root:
+Configure `.env.local`:
 
 ```env
-# WalletConnect
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id
+DATABASE_URL=postgresql://...
 
-# Flow EVM Smart Contracts (Testnet)
-NEXT_PUBLIC_FACTORY_ADDRESS=0xE7579839f736Be431750DCC8715de34305C71c4E
-NEXT_PUBLIC_USDC_ADDRESS=0x1b568EaBb15edb5CAd05ac3Ba983e238DE1854B3
-
-# Database
-DATABASE_URL=postgresql://user:password@host:port/database
+# Stellar contract addresses
+NEXT_PUBLIC_STELLAR_USDC=CDDEX6FS3GISJG366H7RRP432UZ6P3QBDWFFF6RBQE3D7F6KQ4SNFSWC
+NEXT_PUBLIC_STELLAR_FACTORY=CDGM6NNJGNSI36L32A4NDVVJXMU4CPDNYERPR6F44SPRWCAMOGHE6OHP
+NEXT_PUBLIC_STELLAR_CLOB=CBCCF22KDF6UMKX6QCKNQ6LE4ROEOIAZEHO7ZJKUANKN6FF5MLWXUJ6O
+NEXT_PUBLIC_STELLAR_ORACLE=CCZCR627NOPJGWSQ7W7SRFM5YXTUCJ4MLUEKFZJXHTEIAZWYXROHHZK2
+NEXT_PUBLIC_STELLAR_RPC=https://soroban-testnet.stellar.org
+NEXT_PUBLIC_STELLAR_NETWORK=testnet
 ```
 
-### 3. Database Setup
-
 ```bash
-npx prisma db push
-npx prisma generate
-```
-
-### 4. Run Dev Server
-
-```bash
+npx prisma migrate dev
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+### Get Test USDC
 
-### 5. Production Build
-
-```bash
-npm run build
-npm start
-```
-
----
-
-## 🔗 Smart Contract Deployment
-
-Contracts are deployed and verified on Flow EVM Testnet:
-
-```
-MockUSDC:          0x1b568EaBb15edb5CAd05ac3Ba983e238DE1854B3
-SabiMarketFactory: 0xE7579839f736Be431750DCC8715de34305C71c4E
-```
-
-To re-deploy or deploy new markets:
+In the app click **Get USDC** in the wallet menu, or run:
 
 ```bash
-cd smartcontracts
-npm install
-cp .env.example .env  # add DEPLOYER_PRIVATE_KEY and FLOW_TESTNET_RPC
-
-# Deploy contracts
-npx hardhat run scripts/deploy.js --network flowTestnet
-
-# Seed additional markets
-npx hardhat run scripts/seedMarkets.js --network flowTestnet
-```
-
-### Network Config
-
-```
-Network:    Flow EVM Testnet
-Chain ID:   545
-RPC:        https://testnet.evm.nodes.onflow.org
-Explorer:   https://evm-testnet.flowscan.io
-Faucet:     https://faucet.flow.com (select EVM)
+cd ../smartcontract-stellar
+bash scripts/faucet.sh YOUR_STELLAR_G_ADDRESS
 ```
 
 ---
 
-## 🌐 Internationalization
+## Tech Stack
 
-SabiMarkets ships with full support for 15 languages, including major African languages:
-
-| Code | Language | Code | Language |
-|---|---|---|---|
-| `en` | English | `ha` | Hausa |
-| `fr` | French | `yo` | Yoruba |
-| `ar` | Arabic | `ig` | Igbo |
-| `sw` | Swahili | `pcm` | Nigerian Pidgin |
-| `am` | Amharic | `rw` | Kinyarwanda |
-| `pt` | Portuguese | `so` | Somali |
-| `tw` | Twi | `xh` | Xhosa |
-| `zu` | Zulu | | |
-
-Market questions and descriptions are auto-translated server-side on first load.
+| Layer | Technology |
+|---|---|
+| **Blockchain** | Stellar / Soroban |
+| **Smart Contracts** | Rust (soroban-sdk v22) |
+| **Wallet** | Freighter (`@stellar/freighter-api`) |
+| **Stellar SDK** | `@stellar/stellar-sdk` |
+| **Frontend** | Next.js 16, React 19, TypeScript |
+| **Styling** | Tailwind CSS 4 |
+| **State** | Zustand |
+| **Database** | Prisma + PostgreSQL (Neon) |
+| **i18n** | next-intl (16 languages) |
+| **Error Tracking** | Sentry |
 
 ---
 
-## 📁 Project Structure
+## License
 
-```
-sabimarkets/
-├── src/
-│   ├── app/              # Next.js App Router (pages + API routes)
-│   ├── components/       # React components
-│   ├── lib/              # Smart contract ABIs, API, utils
-│   ├── hooks/            # Custom React hooks
-│   ├── store/            # Zustand global state
-│   └── i18n/             # next-intl routing + messages
-├── smartcontracts/       # Hardhat project (Solidity contracts)
-│   ├── contracts/        # SabiMarket.sol, Factory, MockUSDC
-│   └── scripts/          # deploy.js, seedMarkets.js
-├── prisma/               # Database schema (PostgreSQL)
-├── messages/             # i18n JSON per locale (15 languages)
-└── public/               # Static assets
-```
-
----
-
-## 📜 License
-
-MIT License
-
----
-
-## 🔗 Links
-
-- **Live App:** [testnet.sabimarket.xyz](https://testnet.sabimarket.xyz)
-- **Contract Explorer:** [evm-testnet.flowscan.io](https://evm-testnet.flowscan.io/address/0xE7579839f736Be431750DCC8715de34305C71c4E)
-- **Flow EVM Docs:** [developers.flow.com/evm](https://developers.flow.com/evm)
-
----
-
-*Built for Africa. Powered by Flow.*
+MIT

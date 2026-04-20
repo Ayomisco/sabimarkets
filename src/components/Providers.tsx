@@ -1,48 +1,102 @@
 "use client";
 
-import '@rainbow-me/rainbowkit/styles.css';
-import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
-import { WagmiProvider, http } from 'wagmi';
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ToastProvider } from '@/components/Toast';
 import { AnalyticsProvider } from '@/components/AnalyticsProvider';
-import { flowTestnet } from '@/lib/contracts';
+import {
+  connectFreighter,
+  getConnectedAddress,
+  isFreighterInstalled,
+  type FreighterAccount,
+} from '@/lib/stellar/wallet';
 
-const RPC_URL = 'https://testnet.evm.nodes.onflow.org';
+// ─── Freighter Wallet Context ───────────────────────────────────────────────
 
-const config = getDefaultConfig({
-    appName: 'SabiMarket',
-    projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'd579a8a79998b9febf26831effd00175',
-    chains: [flowTestnet],
-    ssr: true,
-    transports: {
-        [flowTestnet.id]: http(RPC_URL, { retryCount: 4, retryDelay: 600 }),
-    },
+interface WalletContextValue {
+  address: string | null;
+  network: string | null;
+  isConnected: boolean;
+  isInstalled: boolean;
+  connecting: boolean;
+  connect: () => Promise<void>;
+  disconnect: () => void;
+}
+
+export const WalletContext = createContext<WalletContextValue>({
+  address: null,
+  network: null,
+  isConnected: false,
+  isInstalled: false,
+  connecting: false,
+  connect: async () => {},
+  disconnect: () => {},
 });
 
-const queryClient = new QueryClient();
+export function useWallet() {
+  return useContext(WalletContext);
+}
 
-export function Providers({ children }: { children: React.ReactNode }) {
-    return (
-        <WagmiProvider config={config}>
-            <QueryClientProvider client={queryClient}>
-                <RainbowKitProvider theme={darkTheme({
-                    accentColor: '#00D26A',
-                    accentColorForeground: 'black',
-                    borderRadius: 'large',
-                    fontStack: 'system',
-                    overlayBlur: 'small',
-                })}>
-                    <ToastProvider>
-                        <AnalyticsProvider />
-                        {children}
-                        <Analytics />
-                        <SpeedInsights />
-                    </ToastProvider>
-                </RainbowKitProvider>
-            </QueryClientProvider>
-        </WagmiProvider>
-    );
+function WalletProvider({ children }: { children: ReactNode }) {
+  const [account, setAccount] = useState<FreighterAccount | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+
+  // On mount: check installation + restore previous connection
+  useEffect(() => {
+    (async () => {
+      const installed = await isFreighterInstalled();
+      setIsInstalled(installed);
+      if (installed) {
+        const addr = await getConnectedAddress();
+        if (addr) setAccount({ address: addr, network: 'testnet' });
+      }
+    })();
+  }, []);
+
+  const connect = useCallback(async () => {
+    setConnecting(true);
+    try {
+      const acc = await connectFreighter();
+      if (acc) setAccount(acc);
+    } finally {
+      setConnecting(false);
+    }
+  }, []);
+
+  const disconnect = useCallback(() => {
+    setAccount(null);
+  }, []);
+
+  return (
+    <WalletContext.Provider
+      value={{
+        address: account?.address ?? null,
+        network: account?.network ?? null,
+        isConnected: !!account?.address,
+        isInstalled,
+        connecting,
+        connect,
+        disconnect,
+      }}
+    >
+      {children}
+    </WalletContext.Provider>
+  );
+}
+
+// ─── Root Providers ──────────────────────────────────────────────────────────
+
+export function Providers({ children }: { children: ReactNode }) {
+  return (
+    <WalletProvider>
+      <ToastProvider>
+        <AnalyticsProvider />
+        {children}
+        <Analytics />
+        <SpeedInsights />
+      </ToastProvider>
+    </WalletProvider>
+  );
 }

@@ -6,16 +6,10 @@ import { Share2, BookmarkPlus, ExternalLink, TrendingUp, Clock, X, Zap, Wallet }
 import MarketChart from './MarketChart';
 import CommentSection from './CommentSection';
 import { useToast } from './Toast';
-import { useAccount, useReadContract } from 'wagmi';
-import { formatUnits } from 'viem';
+import { useWallet } from '@/components/Providers';
+import { fetchUsdcBalance } from '@/lib/stellar/api';
 import { useAnalytics } from '@/hooks/useAnalytics';
-import { CONTRACTS, USDC_ABI, flowTestnet } from '@/lib/contracts';
-
 import { useState, useEffect } from 'react';
-
-const USDC_ABI_LOCAL = [
-  { name: 'balanceOf', type: 'function', stateMutability: 'view', inputs: [{ name: 'account', type: 'address' }], outputs: [{ type: 'uint256' }] },
-] as const;
 
 export function MarketDetailModal({
   isOpen,
@@ -28,37 +22,32 @@ export function MarketDetailModal({
   market: Market | null;
   onBet?: (outcome: string, price: number) => void;
 }) {
-  const { address } = useAccount();
+  const { address } = useWallet();
   const { error: toastError, warning: toastWarning, success: toastSuccess } = useToast();
   const { trackView, trackOrder } = useAnalytics();
 
   const [selectedOutcome, setSelectedOutcome] = useState<string>("YES");
   const [orderAmount, setOrderAmount] = useState<number | string>(10);
+  const [usdcBalanceFormatted, setUsdcBalanceFormatted] = useState<string | null>(null);
 
   // Track market view when modal opens
   useEffect(() => {
     if (isOpen && market) {
-      trackView(market.condition_id, market.question, 'modal', address);
+      trackView(market.condition_id, market.question, 'modal', address ?? undefined);
     }
   }, [isOpen, market?.condition_id]);
 
-  // Read USDC balance on Flow EVM — no polling to avoid rate limit
-  const { data: usdcBalance } = useReadContract({
-    address: CONTRACTS.USDC,
-    abi: USDC_ABI_LOCAL,
-    functionName: 'balanceOf',
-    args: address ? [address] : undefined,
-    chainId: flowTestnet.id,
-    query: { refetchInterval: false, staleTime: 30_000 },
-  });
+  // Fetch USDC balance from Stellar
+  useEffect(() => {
+    if (address) {
+      fetchUsdcBalance(address).then(bal => setUsdcBalanceFormatted(bal != null ? bal.toFixed(2) : null));
+    }
+  }, [address]);
 
   if (!market) return null;
 
-  const usdcBalanceFormatted = usdcBalance
-    ? parseFloat(formatUnits(usdcBalance as bigint, 6)).toFixed(2)
-    : null;
   const validAmount = typeof orderAmount === 'string' && orderAmount === '' ? 0 : Number(orderAmount);
-  const hasEnoughUsdc = usdcBalance ? Number(formatUnits(usdcBalance as bigint, 6)) >= validAmount : true;
+  const hasEnoughUsdc = usdcBalanceFormatted ? parseFloat(usdcBalanceFormatted) >= validAmount : true;
 
   const outcomes = market.outcomes || ["Yes", "No"];
   const outcomePrices = market.outcomePrices || ["0.5", "0.5"];
@@ -104,14 +93,14 @@ export function MarketDetailModal({
             <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#7A7068]">
               <span className="flex items-center gap-1"><TrendingUp size={11} />${stringVol} Vol.</span>
               <span className="flex items-center gap-1"><Clock size={11} />Closes {closeDate}</span>
-              <span className="flex items-center gap-1 text-[#00D26A]"><Zap size={10} fill="#00D26A" />Flow EVM</span>
+              <span className="flex items-center gap-1 text-[#00D26A]"><Zap size={10} fill="#00D26A" />Stellar</span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <a href={`https://evm-testnet.flowscan.io/address/${market.id}`}
+            <a href={`https://stellar.expert/explorer/testnet/contract/${market.id}`}
                target="_blank" rel="noopener noreferrer"
                className="hidden sm:flex cursor-pointer items-center gap-1.5 px-2.5 py-1.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[11px] text-[#7A7068] hover:text-white transition-colors">
-              <ExternalLink size={12} /> FlowScan
+              <ExternalLink size={12} /> Stellar Expert
             </a>
             <button className="cursor-pointer p-2 bg-white/[0.04] border border-white/[0.07] rounded-lg text-[#7A7068] hover:text-white transition-colors hidden sm:flex">
               <Share2 size={13} />
@@ -352,10 +341,10 @@ export function MarketDetailModal({
 
                 {/* Links row */}
                 <div className="flex items-center justify-center gap-3 mt-4">
-                  <a href={`https://evm-testnet.flowscan.io/address/${market.id}`}
+                  <a href={`https://stellar.expert/explorer/testnet/contract/${market.id}`}
                      target="_blank" rel="noopener noreferrer"
                      className="cursor-pointer flex items-center gap-1 text-[11px] text-[#7A7068] hover:text-white transition-colors">
-                    <ExternalLink size={11} /> View on FlowScan
+                    <ExternalLink size={11} /> View on Stellar Expert
                   </a>
                   <span className="text-white/20">|</span>
                   <button className="cursor-pointer flex items-center gap-1 text-[11px] text-[#7A7068] hover:text-white transition-colors">

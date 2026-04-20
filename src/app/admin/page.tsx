@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useWallet } from '@/components/Providers';
 import Link from 'next/link';
 import { ArrowLeft, Users, DollarSign, Activity, Eye, TrendingUp, TrendingDown, Wallet, Globe } from 'lucide-react';
 
@@ -61,7 +61,7 @@ const ADMIN_WALLETS = [
 ];
 
 export default function AdminDashboard() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWallet();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(7);
