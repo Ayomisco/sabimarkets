@@ -11,7 +11,7 @@
  */
 
 import 'dotenv/config';
-import { Worker, Queue, QueueScheduler } from 'bullmq';
+import { Worker, Queue } from 'bullmq';
 import { getRedis, QUEUE_NAMES } from './src/lib/queue';
 import { runFxRefresh } from './src/workers/fx-refresh';
 import { runMarketExpiry } from './src/workers/market-expiry';

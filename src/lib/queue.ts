@@ -4,7 +4,7 @@
  */
 
 import IORedis from 'ioredis';
-import { Queue, QueueOptions } from 'bullmq';
+import { Queue, type QueueOptions } from 'bullmq';
 
 // ── Connection ─────────────────────────────────────────────────────────────
 
@@ -35,22 +35,39 @@ export const QUEUE_NAMES = {
 
 // ── Job type definitions ───────────────────────────────────────────────────
 
-export type FxRefreshJob     = Record<string, never>;
-export type MarketExpiryJob  = Record<string, never>;
+export type FxRefreshJob      = Record<string, never>;
+export type MarketExpiryJob   = Record<string, never>;
 export type OracleFinalizeJob = { marketId: string; proposalAddress: string };
 
-// ── Queue factory ──────────────────────────────────────────────────────────
+// ── Lazy queue factory (do NOT instantiate at module load — breaks Next.js) ──
 
-const defaultOpts: QueueOptions = {
-  connection: getRedis(),
-  defaultJobOptions: {
-    removeOnComplete: 100,
-    removeOnFail: 200,
-    attempts: 3,
-    backoff: { type: 'exponential', delay: 5_000 },
-  },
-};
+let _fxQueue: Queue<FxRefreshJob> | null = null;
+let _marketExpiryQueue: Queue<MarketExpiryJob> | null = null;
+let _oracleFinalizeQueue: Queue<OracleFinalizeJob> | null = null;
 
-export const fxRefreshQueue    = new Queue<FxRefreshJob>(QUEUE_NAMES.FX_REFRESH, defaultOpts);
-export const marketExpiryQueue = new Queue<MarketExpiryJob>(QUEUE_NAMES.MARKET_EXPIRY, defaultOpts);
-export const oracleFinalizeQueue = new Queue<OracleFinalizeJob>(QUEUE_NAMES.ORACLE_FINALIZE, defaultOpts);
+function makeOpts(): QueueOptions {
+  return {
+    connection: getRedis(),
+    defaultJobOptions: {
+      removeOnComplete: 100,
+      removeOnFail: 200,
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 5_000 },
+    },
+  };
+}
+
+export function getFxRefreshQueue(): Queue<FxRefreshJob> {
+  if (!_fxQueue) _fxQueue = new Queue<FxRefreshJob>(QUEUE_NAMES.FX_REFRESH, makeOpts());
+  return _fxQueue;
+}
+
+export function getMarketExpiryQueue(): Queue<MarketExpiryJob> {
+  if (!_marketExpiryQueue) _marketExpiryQueue = new Queue<MarketExpiryJob>(QUEUE_NAMES.MARKET_EXPIRY, makeOpts());
+  return _marketExpiryQueue;
+}
+
+export function getOracleFinalizeQueue(): Queue<OracleFinalizeJob> {
+  if (!_oracleFinalizeQueue) _oracleFinalizeQueue = new Queue<OracleFinalizeJob>(QUEUE_NAMES.ORACLE_FINALIZE, makeOpts());
+  return _oracleFinalizeQueue;
+}

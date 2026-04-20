@@ -86,20 +86,16 @@ async function submitOnChainProposal(
 
   try {
     const {
-      Keypair, Contract, TransactionBuilder, BASE_FEE, Networks,
-      nativeToScVal, xdr, rpc,
+      Keypair, Contract, TransactionBuilder, BASE_FEE,
+      nativeToScVal, Address, xdr, rpc,
     } = await import('@stellar/stellar-sdk');
 
     const keypair = Keypair.fromSecret(secret);
     const server = new rpc.Server(STELLAR_RPC, { allowHttp: false });
     const account = await server.getAccount(keypair.publicKey());
 
-    // Encode verdict as ScVal symbol
-    const verdictScVal = verdict === 'Yes'
-      ? xdr.ScVal.scvVec([xdr.ScVal.scvSymbol('Yes')])
-      : verdict === 'No'
-        ? xdr.ScVal.scvVec([xdr.ScVal.scvSymbol('No')])
-        : xdr.ScVal.scvVec([xdr.ScVal.scvSymbol('Invalid')]);
+    // Encode Verdict enum as ScVal — contract uses soroban_sdk enum (symbol variant)
+    const verdictScVal = xdr.ScVal.scvVec([xdr.ScVal.scvSymbol(verdict)]);
 
     const contract = new Contract(ORACLE_CONTRACT);
     const tx = new TransactionBuilder(account, {
@@ -108,11 +104,11 @@ async function submitOnChainProposal(
     })
       .addOperation(contract.call(
         'propose',
-        nativeToScVal(keypair.publicKey()),          // proposer
-        nativeToScVal(marketAddress),                 // market
-        verdictScVal,                                 // verdict
-        nativeToScVal(Buffer.from(evidenceUri)),      // evidence_uri (Bytes)
-        nativeToScVal(Buffer.from(verdictHash, 'hex'), { type: 'bytes' }), // ai_verdict_hash (BytesN<32>)
+        nativeToScVal(Address.fromString(keypair.publicKey()), { type: 'address' }), // proposer
+        nativeToScVal(Address.fromString(marketAddress), { type: 'address' }),        // market
+        verdictScVal,                                                                  // verdict
+        xdr.ScVal.scvBytes(Buffer.from(evidenceUri, 'utf8')),                         // evidence_uri
+        xdr.ScVal.scvBytes(Buffer.from(verdictHash.padEnd(64, '0').slice(0, 64), 'hex')), // ai_verdict_hash BytesN<32>
       ))
       .setTimeout(30)
       .build();
