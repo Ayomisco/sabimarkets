@@ -3,11 +3,9 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "Dockerfile",
-    "dockerBuildTarget": "app"
+    "dockerBuildTarget": "worker"
   },
   "deploy": {
-    "healthcheckPath": "/en",
-    "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 5
   }

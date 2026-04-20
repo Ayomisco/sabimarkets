@@ -11,8 +11,21 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import Redis from 'ioredis';
 
-// African + major currencies we care about
+const REDIS_KEY = 'fx:rates:usd';
+// Fallback in-process cache (used when Redis is unavailable)
+let memCache: { rates: Record<string, number>; updatedAt: number } | null = null;
+const MEM_CACHE_TTL_MS = 5 * 60 * 1000;
+
+function getRedis(): Redis | null {
+  if (!process.env.REDIS_URL) return null;
+  try {
+    return new Redis(process.env.REDIS_URL, { maxRetriesPerRequest: 1, lazyConnect: true });
+  } catch {
+    return null;
+  }
+}
 const AFRICAN_CURRENCIES = [
   'NGN', // Nigerian Naira
   'KES', // Kenyan Shilling
@@ -36,7 +49,7 @@ const AFRICAN_CURRENCIES = [
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-// Simple in-process cache
+// Simple in-process cache — replaced by Redis when available
 let cache: { rates: Record<string, number>; updatedAt: number } | null = null;
 
 async function fetchFromExchangeRateAPI(apiKey: string): Promise<Record<string, number>> {
@@ -71,9 +84,25 @@ async function fetchFromFrankfurter(): Promise<Record<string, number>> {
 }
 
 async function getRates(): Promise<Record<string, number>> {
-  // Return cached if fresh
-  if (cache && Date.now() - cache.updatedAt < CACHE_TTL_MS) {
-    return cache.rates;
+  // 1. Try Redis cache (set by fx-refresh worker)
+  const redis = getRedis();
+  if (redis) {
+    try {
+      await redis.connect();
+      const cached = await redis.get(REDIS_KEY);
+      await redis.quit();
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        return parsed.rates ?? parsed;
+      }
+    } catch {
+      // Redis unavailable — fall through to in-process cache
+    }
+  }
+
+  // 2. In-process fallback cache
+  if (memCache && Date.now() - memCache.updatedAt < MEM_CACHE_TTL_MS) {
+    return memCache.rates;
   }
 
   const apiKey = process.env.EXCHANGE_RATE_API_KEY;
@@ -97,6 +126,7 @@ async function getRates(): Promise<Record<string, number>> {
   }
 
   cache = { rates, updatedAt: Date.now() };
+  memCache = { rates, updatedAt: Date.now() };
   return rates;
 }
 

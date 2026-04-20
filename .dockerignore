@@ -1,0 +1,14 @@
+.env
+.env.*
+.git
+.gitignore
+node_modules
+.next
+dist
+target
+smartcontracts
+docs
+README.md
+*.md
+.DS_Store
+coverage
