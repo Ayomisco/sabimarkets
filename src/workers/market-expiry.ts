@@ -22,7 +22,7 @@ async function fetchExpiredMarkets(): Promise<Array<{ marketId: string; address:
       headers: { 'x-cron-secret': process.env.CRON_SECRET ?? '' },
     });
     if (!res.ok) return [];
-    const data = await res.json();
+    const data = await res.json() as { markets: Array<{ conditionId: string }> };
     // API returns { conditionId, title, category, createdAt } — conditionId IS the market address
     return (data.markets ?? []).map((m: { conditionId: string }) => ({
       marketId: m.conditionId,

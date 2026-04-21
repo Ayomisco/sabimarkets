@@ -20,7 +20,7 @@ async function fetchLiveRates(): Promise<Record<string, number>> {
   if (apiKey) {
     const res = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`);
     if (res.ok) {
-      const data = await res.json();
+      const data = await res.json() as { result: string; conversion_rates: Record<string, number> };
       if (data.result === 'success') {
         const rates: Record<string, number> = { USD: 1 };
         for (const cur of AFRICAN_CURRENCIES) {
@@ -35,7 +35,7 @@ async function fetchLiveRates(): Promise<Record<string, number>> {
   const symbols = AFRICAN_CURRENCIES.join(',');
   const res = await fetch(`https://api.frankfurter.dev/v1/latest?base=USD&symbols=${symbols}`);
   if (!res.ok) throw new Error(`Frankfurter failed: ${res.status}`);
-  const data = await res.json();
+  const data = await res.json() as { rates: Record<string, number> };
   return { USD: 1, ...data.rates };
 }
 

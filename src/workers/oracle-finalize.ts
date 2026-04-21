@@ -54,7 +54,7 @@ Has this event definitively occurred? Respond ONLY with JSON:
 
   if (!res.ok) return { verdict: 'Invalid', reasoning: 'Groq API error', hash: '' };
 
-  const data = await res.json();
+  const data = await res.json() as { choices: Array<{ message: { content: string } }> };
   const raw = data.choices?.[0]?.message?.content ?? '{}';
   const parsed = JSON.parse(raw) as { verdict: string; confidence: number; reasoning: string };
   const verdict = ['Yes', 'No', 'Invalid'].includes(parsed.verdict)
