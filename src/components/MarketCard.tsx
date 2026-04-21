@@ -136,9 +136,9 @@ export function MarketCard({ market, index, onMarketClick, onBetClick }: MarketC
         </div>
         <div className="flex items-center gap-1">
           <div className="w-3.5 h-3.5 rounded-full bg-[#1A1511] border border-white/10 flex items-center justify-center">
-            <span className="text-[7px] text-[#7A7068] font-bold">S</span>
+            <span className="text-[7px] text-[#7A7068] font-bold">✦</span>
           </div>
-          <span className="text-[10px] text-[#7A7068]">Flow EVM</span>
+          <span className="text-[10px] text-[#7A7068]">Stellar</span>
         </div>
       </div>
     </motion.div>

@@ -81,21 +81,13 @@ export function MarketList({ initialMarkets }: { initialMarkets: (Market & { uiC
             {/* Markets Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredMarkets.length > 0 ? filteredMarkets.map((market, i) => (
-                  <>
-                    <MarketCard
-                        key={market.id || i}
-                        market={market}
-                        index={i}
-                        onMarketClick={handleMarketClick}
-                        onBetClick={handleBetClick}
-                    />
-                    {/* Inject CTA after every 6th card */}
-                    {(i + 1) % 6 === 0 && (
-                      <div key={`cta-${i}`} className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
-                        <CreateMarketCTA variant="banner" />
-                      </div>
-                    )}
-                  </>
+                  <MarketCard
+                      key={market.id || i}
+                      market={market}
+                      index={i}
+                      onMarketClick={handleMarketClick}
+                      onBetClick={handleBetClick}
+                  />
                 )) : (
                     <div className="col-span-full py-16 text-center flex flex-col items-center gap-4">
                       <p className="text-[#7A7068] text-sm font-mono">No markets found in this category.</p>
