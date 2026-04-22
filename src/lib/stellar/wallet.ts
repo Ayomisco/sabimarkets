@@ -78,3 +78,44 @@ export function stellarAvatarGradient(address: string): string {
   const h2 = (h1 + 140) % 360;
   return `linear-gradient(135deg, hsl(${h1},80%,55%) 0%, hsl(${h2},80%,45%) 100%)`;
 }
+
+/**
+ * Call the MockUSDC faucet — mints 10,000 testnet USDC to the caller.
+ * Requires Freighter to sign the transaction.
+ */
+export async function callUsdcFaucet(address: string): Promise<string> {
+  const [
+    { Contract, TransactionBuilder, BASE_FEE, Address, rpc: rpcNs },
+    { getSorobanServer },
+    { STELLAR_CONTRACTS, STELLAR_NETWORK_PASSPHRASE },
+  ] = await Promise.all([
+    import('@stellar/stellar-sdk'),
+    import('@/lib/stellar/client'),
+    import('@/lib/stellar/contracts'),
+  ]);
+
+  const server = getSorobanServer();
+  const account = await server.getAccount(address);
+  const contract = new Contract(STELLAR_CONTRACTS.USDC);
+  const addrScVal = new Address(address).toScVal();
+
+  const tx = new TransactionBuilder(account, {
+    fee: BASE_FEE,
+    networkPassphrase: STELLAR_NETWORK_PASSPHRASE,
+  })
+    .addOperation(contract.call('faucet', addrScVal))
+    .setTimeout(30)
+    .build();
+
+  const sim = await server.simulateTransaction(tx);
+  if (rpcNs.Api.isSimulationError(sim)) throw new Error(`Simulation failed: ${sim.error}`);
+
+  const assembled = rpcNs.assembleTransaction(tx, sim).build();
+  const signedXdr = await signTransactionXDR(assembled.toXDR(), STELLAR_NETWORK_PASSPHRASE);
+
+  const result = await server.sendTransaction(
+    TransactionBuilder.fromXDR(signedXdr, STELLAR_NETWORK_PASSPHRASE),
+  );
+  if (result.status === 'ERROR') throw new Error(`Submit failed: ${result.errorResult?.toXDR()}`);
+  return result.hash;
+}

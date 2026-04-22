@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   Copy, ExternalLink, Settings, LogOut, ChevronDown,
-  CheckCircle, Wallet, TrendingUp, Download, Droplets
+  CheckCircle, Wallet, TrendingUp, Droplets
 } from 'lucide-react';
 import { useRouter } from '@/i18n/routing';
 import { useWallet } from '@/components/Providers';
-import { shortenStellarAddress, stellarAvatarGradient } from '@/lib/stellar/wallet';
+import { shortenStellarAddress, stellarAvatarGradient, callUsdcFaucet } from '@/lib/stellar/wallet';
 import { accountLink } from '@/lib/stellar/contracts';
 import { fetchUsdcBalance } from '@/lib/stellar/api';
 
@@ -34,7 +34,8 @@ export function WalletMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [usdcBalance, setUsdcBalance] = useState<number | null>(null);
-  const [fundingBot, setFundingBot] = useState(false);
+  const [mintingUsdc, setMintingUsdc] = useState(false);
+  const [mintError, setMintError] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -66,17 +67,20 @@ export function WalletMenu() {
     if (address) window.open(accountLink(address), '_blank');
   };
 
-  const handleFriendbot = async () => {
+  const handleGetUsdc = async () => {
     if (!address) return;
-    setFundingBot(true);
+    setMintingUsdc(true);
+    setMintError(null);
     try {
-      await fetch(`https://friendbot.stellar.org/?addr=${encodeURIComponent(address)}`);
-      // Refetch balance after a short delay
+      await callUsdcFaucet(address);
+      // Refetch balance after the tx lands (~5s)
       setTimeout(() => {
         fetchUsdcBalance(address).then(bal => setUsdcBalance(bal)).catch(() => {});
-      }, 2000);
+      }, 5000);
+    } catch (err) {
+      setMintError(err instanceof Error ? err.message : 'Faucet failed');
     } finally {
-      setFundingBot(false);
+      setMintingUsdc(false);
     }
   };
 
@@ -85,29 +89,83 @@ export function WalletMenu() {
   }
 
   if (!isConnected || !address) {
-    if (!isInstalled) {
-      return (
-        <a
-          href="https://www.freighter.app/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.05] border border-white/[0.09] text-[#F0EBE1] text-[13px] font-semibold rounded-xl transition-all hover:bg-white/[0.09]"
-        >
-          <Download size={13} />
-          <span className="hidden sm:inline">Get Freighter</span>
-        </a>
-      );
-    }
-
     return (
-      <button
-        onClick={connect}
-        disabled={connecting}
-        className="cursor-pointer flex items-center gap-2 px-3 py-1.5 bg-[#00D26A] hover:bg-[#00B85E] disabled:opacity-60 text-black text-[13px] font-bold rounded-xl transition-all"
-      >
-        <Wallet size={13} />
-        <span>{connecting ? 'Connecting…' : 'Connect'}</span>
-      </button>
+      <>
+        <button
+          onClick={() => setIsOpen(true)}
+          disabled={connecting}
+          className="cursor-pointer flex items-center gap-2 px-3 py-1.5 bg-[#00D26A] hover:bg-[#00B85E] disabled:opacity-60 text-black text-[13px] font-bold rounded-xl transition-all"
+        >
+          <Wallet size={13} />
+          <span>{connecting ? 'Connecting…' : 'Connect Wallet'}</span>
+        </button>
+
+        {/* Wallet picker modal */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setIsOpen(false)}
+          >
+            <div
+              className="w-full max-w-sm bg-[#0F0D0B] border border-white/[0.09] rounded-2xl shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-5 border-b border-white/[0.06]">
+                <h2 className="text-[15px] font-bold text-white">Connect a Wallet</h2>
+                <p className="text-[12px] text-[#7A7068] mt-1">Choose your Stellar wallet to continue</p>
+              </div>
+              <div className="p-3 space-y-1.5">
+                {/* Freighter */}
+                <button
+                  onClick={() => { setIsOpen(false); isInstalled ? connect() : window.open('https://www.freighter.app/', '_blank'); }}
+                  className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.07] transition-all group"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-[#1A1511] border border-white/10 flex items-center justify-center text-lg shrink-0">🚀</div>
+                  <div className="flex-1 text-left">
+                    <p className="text-[13px] font-semibold text-white">Freighter</p>
+                    <p className="text-[11px] text-[#7A7068]">{isInstalled ? 'Browser extension · Ready' : 'Browser extension · Not installed'}</p>
+                  </div>
+                  {!isInstalled && (
+                    <span className="text-[10px] text-[#00D26A] font-bold border border-[#00D26A]/30 rounded-full px-2 py-0.5">Install</span>
+                  )}
+                </button>
+
+                {/* LOBSTR */}
+                <button
+                  onClick={() => window.open('https://lobstr.co/', '_blank')}
+                  className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.07] transition-all"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-[#1A1511] border border-white/10 flex items-center justify-center text-lg shrink-0">🌟</div>
+                  <div className="flex-1 text-left">
+                    <p className="text-[13px] font-semibold text-white">LOBSTR</p>
+                    <p className="text-[11px] text-[#7A7068]">Mobile & web wallet</p>
+                  </div>
+                  <span className="text-[10px] text-[#7A7068] border border-white/10 rounded-full px-2 py-0.5">Open</span>
+                </button>
+
+                {/* xBull */}
+                <button
+                  onClick={() => window.open('https://xbull.app/', '_blank')}
+                  className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.07] transition-all"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-[#1A1511] border border-white/10 flex items-center justify-center text-lg shrink-0">🐂</div>
+                  <div className="flex-1 text-left">
+                    <p className="text-[13px] font-semibold text-white">xBull Wallet</p>
+                    <p className="text-[11px] text-[#7A7068]">Browser extension & PWA</p>
+                  </div>
+                  <span className="text-[10px] text-[#7A7068] border border-white/10 rounded-full px-2 py-0.5">Open</span>
+                </button>
+              </div>
+              <div className="px-5 py-3 border-t border-white/[0.05]">
+                <p className="text-[11px] text-[#7A7068] text-center">
+                  New to Stellar?{' '}
+                  <a href="https://www.stellar.org/learn/intro-to-stellar" target="_blank" rel="noopener noreferrer" className="text-[#00D26A] hover:underline">Learn more →</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
 
@@ -176,13 +234,14 @@ export function WalletMenu() {
               label="View on Stellar Expert"
               onClick={handleViewOnExplorer}
             />
-            {(usdcBalance === 0 || usdcBalance === null) && (
-              <MenuItem
-                icon={Droplets}
-                label={fundingBot ? 'Funding…' : 'Fund with Friendbot (Testnet)'}
-                onClick={handleFriendbot}
-                color="#F5A623"
-              />
+            <MenuItem
+              icon={Droplets}
+              label={mintingUsdc ? 'Minting USDC…' : 'Get 10,000 Test USDC'}
+              onClick={handleGetUsdc}
+              color="#F5A623"
+            />
+            {mintError && (
+              <p className="text-[11px] text-[#FF4560] px-3 pb-1 leading-snug">{mintError}</p>
             )}
             <MenuItem
               icon={TrendingUp}
